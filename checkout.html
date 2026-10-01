@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checkout | Akwete</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Gloock&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="index.html">Akwete</a>
+  <div class="tools">
+    <a class="pill" href="index.html#shop">Keep shopping</a>
+    <button class="pill" data-auth>Sign in</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Checkout</h1>
+
+  <div class="warn" id="cfgWarn" hidden>
+    The database is not connected yet. Add your Supabase URL and anon key in <code>js/config.js</code>, then reload.
+  </div>
+
+  <div id="empty" hidden>
+    <p style="margin-bottom:20px">Your bag is empty.</p>
+    <a class="btn" href="index.html#shop">Browse the shop</a>
+  </div>
+
+  <div class="grid" id="main">
+    <form id="form">
+      <div class="authbox" id="authbox"></div>
+
+      <div class="field"><label for="name">Full name</label><input id="name" autocomplete="name" required minlength="2" maxlength="80"></div>
+      <div class="row2">
+        <div class="field"><label for="email">Email for your confirmation</label><input id="email" type="email" autocomplete="email" required></div>
+        <div class="field"><label for="phone">Phone</label><input id="phone" type="tel" autocomplete="tel" required pattern="\+?[0-9 ()\-]{7,20}" title="Digits only, 7 to 20 characters. A leading + is fine."></div>
+      </div>
+      <div class="field"><label for="address">Delivery address</label><input id="address" autocomplete="street-address" required minlength="5" maxlength="160"></div>
+      <div class="row2">
+        <div class="field"><label for="city">City or town</label><input id="city" autocomplete="address-level2" required minlength="2" maxlength="60"></div>
+        <div class="field"><label for="state">State</label><select id="state" required></select></div>
+      </div>
+      <div class="field"><label for="notes">Notes (optional)</label><textarea id="notes" maxlength="500" placeholder="Delivery instructions, colour questions, anything we should know."></textarea></div>
+
+      <p class="err" id="err" role="alert"></p>
+      <button class="btn" id="submit" type="submit" disabled>Sign in to place order</button>
+    </form>
+
+    <aside class="summary">
+      <h2>Your order</h2>
+      <ul class="lines" id="lines"></ul>
+      <div class="total"><span>Total</span><span id="total"></span></div>
+      <p class="fine" style="margin-top:14px">Prices are checked again on the server when you place the order. We confirm production time and payment with you after that.</p>
+    </aside>
+  </div>
+
+  <section class="done" id="done" hidden>
+    <h1>Order received.</h1>
+    <p class="num" id="doneNum"></p>
+    <p id="doneEmail"></p>
+    <p class="fine">Total <strong id="doneTotal"></strong>. We will contact you to confirm production time and payment.</p>
+    <div class="btns">
+      <a class="btn" href="orders.html">View my orders</a>
+      <a class="btn ghost" href="index.html">Back to the shop</a>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="js/config.js"></script>
+<script src="js/shared.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (s) { return document.querySelector(s); };
+  var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); };
+  var STATES = ['Abia','Adamawa','Akwa Ibom','Anambra','Bauchi','Bayelsa','Benue','Borno','Cross River','Delta','Ebonyi','Edo','Ekiti','Enugu','FCT Abuja','Gombe','Imo','Jigawa','Kaduna','Kano','Katsina','Kebbi','Kogi','Kwara','Lagos','Nasarawa','Niger','Ogun','Ondo','Osun','Oyo','Plateau','Rivers','Sokoto','Taraba','Yobe','Zamfara'];
+  var FIELDS = ['name', 'email', 'phone', 'address', 'city', 'state', 'notes'];
+  var DRAFT = 'akwete_checkout_draft';
+  var placed = false;
+
+  $('#state').innerHTML = '<option value="">Select state</option>' + STATES.map(function (s) { return '<option>' + s + '</option>'; }).join('');
+
+  // keep what was typed while the Google sign-in redirect happens
+  function saveDraft() { var d = {}; FIELDS.forEach(function (f) { d[f] = $('#' + f).value; }); sessionStorage.setItem(DRAFT, JSON.stringify(d)); }
+  function loadDraft() { try { var d = JSON.parse(sessionStorage.getItem(DRAFT)) || {}; FIELDS.forEach(function (f) { if (d[f]) $('#' + f).value = d[f]; }); } catch (e) {} }
+  FIELDS.forEach(function (f) { $('#' + f).addEventListener('input', saveDraft); });
+
+  function renderSummary() {
+    var bag = AK.getBag();
+    $('#empty').hidden = bag.length > 0 || placed;
+    $('#main').hidden = bag.length === 0 || placed;
+    $('#lines').innerHTML = bag.map(function (b) {
+      return '<li><b>' + esc(b.name) + (b.qty > 1 ? ' &times; ' + b.qty : '') + '</b><span>' + AK.naira(b.price * b.qty) + '</span><small>' + esc(b.detail) + '</small></li>';
+    }).join('');
+    $('#total').textContent = AK.naira(AK.total());
+  }
+
+  function renderAuth() {
+    var box = $('#authbox'), btn = $('#submit');
+    $('#cfgWarn').hidden = AK.configured;
+    if (AK.user) {
+      box.className = 'authbox ok';
+      box.innerHTML = '<p>Signed in as <strong>' + esc(AK.user.email || '') + '</strong>.</p><button type="button" class="pill" id="outBtn" style="color:var(--ink)">Sign out</button>';
+      $('#outBtn').onclick = function () { AK.signOut(); };
+      if (!$('#email').value) $('#email').value = AK.user.email || '';
+      if (!$('#name').value) $('#name').value = (AK.user.user_metadata && (AK.user.user_metadata.full_name || AK.user.user_metadata.name)) || '';
+      btn.disabled = false; btn.textContent = 'Place order';
+    } else {
+      box.className = 'authbox';
+      box.innerHTML = '<p>Sign in with Google so we can save your order and send the confirmation.</p><button type="button" class="btn google" id="inBtn">Continue with Google</button>';
+      $('#inBtn').onclick = function () { saveDraft(); AK.signIn(); };
+      btn.disabled = true; btn.textContent = 'Sign in to place order';
+    }
+    if (!AK.configured) btn.disabled = true;
+  }
+
+  $('#form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var err = $('#err'), btn = $('#submit');
+    err.textContent = '';
+    if (!AK.user || !AK.sb) return;
+    var bag = AK.getBag();
+    if (!bag.length) { err.textContent = 'Your bag is empty.'; return; }
+    btn.disabled = true; btn.textContent = 'Placing order...';
+
+    var v = {}; FIELDS.forEach(function (f) { v[f] = $('#' + f).value.trim(); });
+    // prices are NOT sent; the database looks them up
+    var items = bag.map(function (b) { return { slug: b.slug, custom: b.custom, piece: b.piece, detail: b.detail, qty: b.qty }; });
+
+    var res = await AK.sb.rpc('place_order', {
+      p_items: items, p_name: v.name, p_email: v.email, p_phone: v.phone,
+      p_address: v.address, p_city: v.city, p_state: v.state, p_notes: v.notes || null
+    });
+    if (res.error) {
+      err.textContent = 'We could not place the order: ' + res.error.message;
+      btn.disabled = false; btn.textContent = 'Place order';
+      return;
+    }
+    var order = res.data;
+    placed = true;
+    AK.clearBag();
+    sessionStorage.removeItem(DRAFT);
+
+    var emailed = false;
+    try {
+      var mail = await AK.sb.functions.invoke('send-order-email', { body: { order_id: order.id } });
+      emailed = !mail.error;
+      if (mail.error) console.warn('Confirmation email failed:', mail.error);
+    } catch (x) { console.warn('Confirmation email failed:', x); }
+
+    $('#main').hidden = true; $('#empty').hidden = true; $('#done').hidden = false;
+    $('#doneNum').textContent = order.order_number;
+    $('#doneTotal').textContent = AK.naira(order.total_ngn);
+    $('#doneEmail').textContent = emailed
+      ? 'A confirmation email is on its way to ' + v.email + '.'
+      : 'Your order is saved. The confirmation email could not be sent just now, but you can see the order under My orders.';
+    window.scrollTo(0, 0);
+  });
+
+  loadDraft();
+  renderSummary();
+  AK.ready.then(function () { renderAuth(); });
+  window.addEventListener('authchange', renderAuth);
+  window.addEventListener('bagchange', renderSummary);
+})();
+</script>
+</body>
+</html>
