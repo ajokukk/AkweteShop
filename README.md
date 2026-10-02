@@ -82,6 +82,21 @@ Open http://localhost:3000, add a piece, go to checkout, sign in with Google, pl
 ### 5. Deploy
 Any static host works (Vercel, Netlify, Cloudflare Pages, GitHub Pages). Then add the live URL to Google's authorized origins and Supabase's redirect URLs.
 
+## Troubleshooting sign-in
+- **"Unsupported provider: provider is not enabled"**: Google is not switched on in Supabase. Go to Authentication > Sign In / Providers > Google, turn it on, paste the Google Client ID and Client secret, and save.
+- **"redirect_uri_mismatch" from Google**: the Authorized redirect URI in Google Cloud Console must be exactly the callback URL shown on Supabase's Google provider page.
+- **Signed in but sent to the wrong page or localhost**: set the Site URL and add your live address with `/**` under Authentication > URL Configuration.
+
+## If you already ran schema.sql earlier
+Run `supabase/add-cloths.sql` once in the SQL Editor. It adds the four wrapper products so checkout accepts them.
+
+## Before you go public (not shown on the site)
+- Photo permission and credits: the cloth photos, weaver photos and the portraits on the history page need the owner's permission, with credits added under each image. Several look like museum or press photographs.
+- Weaver names and workshops: add them under the "At the loom" photos once you have them.
+- Real prices and sizes: the prices and sizes in `index.html` and the `products` table are samples. Change both together.
+- Production times: the site does not promise a number of weeks. Add one only when you can keep it.
+- Product claims: describe each item (handwoven, material, size) only as accurately as you can stand behind.
+
 ## Things to know
 - **Payment** is not collected. Orders are saved as `pending` and the email says you will confirm payment. Add Paystack or Flutterwave later if needed.
 - **Custom pieces** are priced on the server as base price x 1.5, rounded to the nearest 1,000. Change that in `place_order()` if your pricing differs.

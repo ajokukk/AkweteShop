@@ -62,6 +62,7 @@ textarea{min-height:90px;resize:vertical}
 .order li{display:flex;justify-content:space-between;gap:12px}
 .badge{display:inline-block;border-radius:99px;padding:2px 12px;font-size:14px;font-weight:600;background:var(--cotton)}
 
+@media(max-width:560px){.pill{white-space:nowrap;padding:5px 11px;font-size:13px}.brand{font-size:24px}}
 @media(max-width:860px){
   .grid{grid-template-columns:1fr}
   .summary{position:static;order:-1}

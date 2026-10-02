@@ -162,13 +162,13 @@ h1,h2,h3{font-weight:400}
 
 /* ============ SHOP ============ */
 .shop{background:var(--paper);overflow-x:clip}
-.gallery{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--pad);padding:20px var(--pad) clamp(100px,20vh,220px);align-items:start}
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(36px,5vw,72px) clamp(20px,3vw,48px);padding:20px var(--pad) clamp(100px,20vh,220px);align-items:start}
 .card{display:block;text-align:left;will-change:transform}
-.c1{grid-column:1/6}
-.c2{grid-column:6/10;margin-top:26vh}
-.c3{grid-column:10/13;margin-top:8vh}
-.card .ph{position:relative;overflow:hidden;background:var(--cotton)}
-.card img{width:100%;height:auto;transition:transform .9s var(--ease)}
+.card:nth-child(3n+2){margin-top:14vh}
+.card:nth-child(3n){margin-top:5vh}
+.card .ph{position:relative;overflow:hidden;background:var(--cotton);aspect-ratio:4/5}
+.card.wide .ph{aspect-ratio:4/3}
+.card img{width:100%;height:100%;object-fit:cover;transition:transform .9s var(--ease)}
 .card:hover img,.card:focus-visible img{transform:scale(1.06)}
 .card .look{position:absolute;left:12px;bottom:12px;background:var(--ink);color:var(--cotton);border-radius:99px;padding:6px 14px;font-size:14px;font-weight:500;opacity:0;transform:translateY(8px);transition:all .4s var(--ease)}
 .card:hover .look,.card:focus-visible .look{opacity:1;transform:none}
@@ -177,9 +177,10 @@ h1,h2,h3{font-weight:400}
 .meta span{font-weight:600;white-space:nowrap}
 .card small{display:block;color:#55534d;font-size:14px}
 .fine{padding:0 var(--pad) 40px;font-size:14px;color:#55534d;margin-top:-60px}
+@media(max-width:560px){.gallery{grid-template-columns:1fr}}
 @media(max-width:860px){
-  .gallery{grid-template-columns:1fr;gap:56px}
-  .c1,.c2,.c3{grid-column:1;margin-top:0;transform:none!important}
+  .gallery{grid-template-columns:1fr 1fr;gap:44px 18px}
+  .card:nth-child(n){margin-top:0;transform:none!important}
   .fine{margin-top:0}
   .card .look{opacity:1;transform:none}
   .modal{grid-template-columns:1fr}
@@ -230,6 +231,7 @@ footer b{font:400 28px var(--serif);color:var(--cotton)}
   .tile,.panel{transition-duration:.01s}
 }
 </style>
+<link rel="stylesheet" href="css/menu.css">
 </head>
 <body>
 
@@ -244,11 +246,26 @@ footer b{font:400 28px var(--serif);color:var(--cotton)}
     <li><a href="#build">Build</a></li>
   </ul>
   <div class="tools">
-    <button class="pill" id="soundBtn" aria-pressed="false">Sound off</button>
-    <button class="pill" id="authBtn" data-auth>Sign in</button>
+    <button class="pill hide-m" data-sound aria-pressed="false">Sound off</button>
+    <button class="pill hide-m" id="authBtn" data-auth>Sign in</button>
     <button class="pill" id="bagBtn">Bag (<span id="bagN">0</span>)</button>
+    <button class="pill menu-btn" id="menuBtn" aria-expanded="false" aria-controls="menu">Menu</button>
   </div>
 </header>
+
+<nav class="menu" id="menu" aria-label="Main menu">
+  <button class="pill menu-close" aria-label="Close menu">Close</button>
+  <a class="ml" href="#weave">The cloth</a>
+  <a class="ml" href="#motifs">Motifs</a>
+  <a class="ml" href="#craft">Craft</a>
+  <a class="ml" href="history.html">History</a>
+  <a class="ml" href="#shop">Shop</a>
+  <a class="ml" href="#build">Build</a>
+  <div class="menu-tools">
+    <button class="pill" data-sound aria-pressed="false">Sound off</button>
+    <button class="pill" data-auth>Sign in</button>
+  </div>
+</nav>
 
 <main>
 <!-- ===== HERO: threads weave the page ===== -->
@@ -319,7 +336,7 @@ footer b{font:400 28px var(--serif);color:var(--cotton)}
         <dt>The time</dt><dd>One cloth can take up to three days, depending on its size and how complex the pattern is.</dd>
         <dt>In pairs</dt><dd>Most cloths are woven as a matching pair, worn together: one as the wrapper, the other as a stole, blouse or folded over the top.</dd>
       </dl>
-      <p>Weaver names and photo credits are not on file yet. Add them under each photo before launch.</p>
+      <p>Weavers at work on upright looms.</p>
     </aside>
   </div>
 </section>
@@ -328,10 +345,10 @@ footer b{font:400 28px var(--serif);color:var(--cotton)}
 <section class="shop" id="shop">
   <div class="sec-head">
     <h2>Objects for living with.</h2>
-    <p>Concept pieces. Photography, sizes and prices are samples until real stock is added.</p>
+    <p>Wrappers to wear, and pieces for the home.</p>
   </div>
   <div class="gallery" id="gallery"></div>
-  <p class="fine">Concept photography, sample sizes and sample prices only. Replace with real product details before accepting orders.</p>
+  <p class="fine">Colours may look slightly different from the photographs. After you order, we contact you to confirm details, production time and payment.</p>
 </section>
 
 <!-- ===== BUILD YOUR AKWETE ===== -->
@@ -375,7 +392,7 @@ footer b{font:400 28px var(--serif);color:var(--cotton)}
   <button class="btn" id="unweaveBtn">Unweave</button>
   <p class="cap" id="mCap"></p>
   <div class="note"><b>Meaning and attribution</b><span id="mMeaning"></span> <a href="history.html#motifs-record">More on the history page</a></div>
-  <h4>Concept pieces in similar colours</h4>
+  <h4>Pieces in similar colours</h4>
   <div class="mini" id="mMini"></div>
 </aside>
 
@@ -407,6 +424,7 @@ footer b{font:400 28px var(--serif);color:var(--cotton)}
 <script src="js/config.js"></script>
 <script src="assets/images.js"></script>
 <script src="js/shared.js"></script>
+<script src="js/menu.js"></script>
 <script>
 window.addEventListener('DOMContentLoaded',()=>{
 'use strict';
@@ -470,13 +488,13 @@ function thunk(){try{const c=snd.ctx,o=c.createOscillator(),g=c.createGain();
   o.connect(g);g.connect(snd.master);o.start();o.stop(c.currentTime+.16);}catch(e){}}
 function beat(){snd.n++;const k=snd.n%4;if(k===1)noise(.07,1800,2,.55);else if(k===3)noise(.07,1050,2,.45);else if(k===0)thunk()}
 const tick=()=>{if(snd.on)noise(.03,3400,3,.3)};
-$('#soundBtn').addEventListener('click',e=>{
-  const b=e.currentTarget;
+const paintSound=()=>$$('[data-sound]').forEach(b=>{b.setAttribute('aria-pressed',snd.on);b.textContent=snd.on?'Sound on':'Sound off'});
+$$('[data-sound]').forEach(b=>b.addEventListener('click',()=>{
   if(!snd.ctx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return toast('Audio is not supported in this browser.');
     snd.ctx=new AC();snd.master=snd.ctx.createGain();snd.master.gain.value=.35;snd.master.connect(snd.ctx.destination)}
-  snd.on=!snd.on;b.setAttribute('aria-pressed',snd.on);b.textContent=snd.on?'Sound on':'Sound off';
+  snd.on=!snd.on;paintSound();
   if(snd.on){snd.ctx.resume();snd.t=setInterval(beat,430)}else{clearInterval(snd.t);}
-});
+}));
 
 /* ============ TOAST ============ */
 let toastT;window.__toast=function(m){toast(m)};function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),3200)}
@@ -547,15 +565,19 @@ const weave=(function(){
 
 /* ============ 3. MOTIF EXPLORER ============ */
 const PRODUCTS={
+  'moss-cloth':{id:'moss-cloth',name:'The Moss Stripe Wrapper',kind:'Wrapper',price:85000,sizes:['One cloth']},
+  'cream-cloth':{id:'cream-cloth',name:'The Cream Diamond Wrapper',kind:'Wrapper',price:95000,sizes:['One cloth']},
+  'ember-cloth':{id:'ember-cloth',name:'The Ember Wrapper',kind:'Wrapper',price:110000,sizes:['One cloth']},
+  'plum-cloth':{id:'plum-cloth',name:'The Plum Border Wrapper',kind:'Wrapper',price:90000,sizes:['One cloth']},
   wrap:{id:'wrap',name:'The Pattern Wrap',kind:'Textile wrap',price:68000,sizes:['1.8 × 1.2 m','2.2 × 1.5 m']},
   runner:{id:'runner',name:'The Woven Runner',kind:'Table textile',price:45000,sizes:['1.5 × 0.4 m','2 × 0.4 m']},
   cushion:{id:'cushion',name:'The Studio Cushion',kind:'Cushion cover',price:32000,sizes:['40 × 40 cm','50 × 50 cm']}
 };
 const MOTIFS={
-  ikaki:{name:'Ikaki',gloss:'Tortoise',meaning:'Traditionally tied to royalty and chieftaincy, to wisdom and cunning, and to peace. The tortoise is also the hero of many Igbo fables. Published accounts differ, so confirm with weavers.',ratio:'487/276',look:'Triangles and diamonds lock together into a tortoise: shell, head and four feet.',pair:['wrap','cushion']},
-  ebe:{name:'Ebe',gloss:'Patterned gourd',meaning:'Described in published accounts as a talisman, protecting warriors going to battle and women during pregnancy. Confirm with weavers.',ratio:'500/276',look:'Nested diamonds step outward in bands of red, gold and black.',pair:['cushion','wrap']},
-  akpukpa:{name:'Akpukpa',gloss:'Geometric',meaning:'One of the four main Akwete patterns named in popular summaries. Vibrant and geometric, worn to chieftaincy ceremonies and weddings, and the pattern buyers from outside the community most often choose. Confirm details with weavers.',ratio:'531/261',look:'Diagonal bars fold back on themselves into chevrons, in green and cream.',pair:['runner']},
-  nki:{name:'Nki',gloss:'Comb, teeth',meaning:'Akwete motifs are often named for what they look like, and comb is among the recorded names. No published meaning for Nki itself was found, so confirm with weavers before adding one.',ratio:'504/261',look:'Fine vertical stripes, like comb teeth, sit between rows of stepped triangles.',pair:['cushion','runner']}
+  ikaki:{name:'Ikaki',gloss:'Tortoise',meaning:'Traditionally tied to royalty and chieftaincy, to wisdom and cunning, and to peace. The tortoise is also the hero of many Igbo fables.',ratio:'487/276',look:'Triangles and diamonds lock together into a tortoise: shell, head and four feet.',pair:['wrap','cushion']},
+  ebe:{name:'Ebe',gloss:'Patterned gourd',meaning:'Described in published accounts as a talisman, protecting warriors going to battle and women during pregnancy.',ratio:'500/276',look:'Nested diamonds step outward in bands of red, gold and black.',pair:['cushion','wrap']},
+  akpukpa:{name:'Akpukpa',gloss:'Geometric',meaning:'One of the four main Akwete patterns named in popular summaries. Vibrant and geometric, worn to chieftaincy ceremonies and weddings, and the pattern buyers from outside the community most often choose.',ratio:'531/261',look:'Diagonal bars fold back on themselves into chevrons, in green and cream.',pair:['runner']},
+  nki:{name:'Nki',gloss:'Comb, teeth',meaning:'Akwete motifs are often named for what they look like, and comb is among the recorded names. A meaning for Nki is not yet recorded here.',ratio:'504/261',look:'Fine vertical stripes, like comb teeth, sit between rows of stepped triangles.',pair:['cushion','runner']}
 };
 const field=$('#field'),plane=$('#plane');
 let px=0,py=0,vx=0,vy=0,PW=2000,PH=1300;
@@ -602,7 +624,7 @@ unBtn.addEventListener('click',()=>{const off=pieces.classList.toggle('off');unB
 function openMotif(id,from){
   const m=MOTIFS[id];$('#mName').textContent=m.name;$('#mGloss').textContent=m.gloss+'. '+m.look;
   buildTiles(id);
-  $('#mMeaning').textContent=m.meaning||'Not yet documented here. Add the meaning, the source, and the weaver who named this motif before launch.';
+  $('#mMeaning').textContent=m.meaning||'A meaning for this motif is not yet recorded here.';
   $('#mMini').innerHTML=m.pair.map(k=>`<button data-prod="${k}"><img src="${IMG[k]}" alt="">${PRODUCTS[k].name}</button>`).join('');
   $$('#mMini button').forEach(b=>b.addEventListener('click',()=>openProduct(b.dataset.prod)));
   openPanel($('#motifPanel'),from);
@@ -627,15 +649,15 @@ makeLens($('#craftLens'),3.2);makeLens($('#prodLens'),3);
 /* ============ 5. SHOP, PRODUCT MODAL, BAG ============ */
 const gallery=$('#gallery');
 Object.values(PRODUCTS).forEach((p,i)=>{
-  const b=document.createElement('button');b.className='card c'+(i+1);b.dataset.speed=[.07,-.05,.11][i];
-  b.innerHTML=`<div class="ph"><img src="${IMG[p.id]}" alt="${p.name}, concept photograph"><span class="look">Look closer</span></div>
+  const b=document.createElement('button');b.className='card'+(p.id.endsWith('-cloth')?' wide':'');b.dataset.speed=[.07,-.05,.11][i%3];
+  b.innerHTML=`<div class="ph"><img src="${IMG[p.id]}" alt="${p.name}"><span class="look">Look closer</span></div>
   <div class="meta"><b>${p.name}</b><span>${naira(p.price)}</span></div><small>${p.kind}</small>`;
   b.addEventListener('click',()=>openProduct(p.id,b));b.addEventListener('pointerenter',tick);gallery.appendChild(b);
 });
 let curProd=null,curSize=null;
 function openProduct(id,from){
   curProd=PRODUCTS[id];curSize=curProd.sizes[0];
-  $('#pImg').src=IMG[id];$('#pImg').alt=curProd.name+', concept photograph';
+  $('#pImg').src=IMG[id];$('#pImg').alt=curProd.name+', photograph';
   $('#pKind').textContent=curProd.kind;$('#pName').textContent=curProd.name;$('#pPrice').textContent=naira(curProd.price);
   const sz=$('#pSizes');sz.innerHTML=curProd.sizes.map((s,i)=>`<button class="chip" aria-pressed="${i===0}" data-s="${s}">${s}</button>`).join('');
   $$('.chip',sz).forEach(c=>c.addEventListener('click',()=>{curSize=c.dataset.s;$$('.chip',sz).forEach(x=>x.setAttribute('aria-pressed',x===c));tick()}));
@@ -694,7 +716,7 @@ function summary(){
   const pc=PIECE[S.piece],est=Math.round(pc.base*1.5/1000)*1000;
   $('#sumTitle').textContent=`Your ${pc.label.toLowerCase()}, ${pc.size}`;
   $('#sumText').textContent=`${PAL[S.base].label} cloth with ${MOTIFS[S.a].name} and ${MOTIFS[S.b].name} in ${ARR[S.arr]} (${S.arr}).`;
-  $('#sumPrice').textContent=`Estimate ${naira(est)}. Typical production time 3 to 5 weeks, confirmed after you order.`;
+  $('#sumPrice').textContent=`Estimate ${naira(est)}. Production time is confirmed after you order.`;
   return est;
 }
 $$('[data-group]').forEach(g=>{

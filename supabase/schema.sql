@@ -15,7 +15,11 @@ create table if not exists public.products (
 insert into public.products (slug, name, kind, price_ngn) values
   ('wrap',    'The Pattern Wrap',   'Textile wrap',  68000),
   ('runner',  'The Woven Runner',   'Table textile', 45000),
-  ('cushion', 'The Studio Cushion', 'Cushion cover', 32000)
+  ('cushion', 'The Studio Cushion', 'Cushion cover', 32000),
+  ('moss-cloth',  'The Moss Stripe Wrapper',   'Wrapper', 85000),
+  ('cream-cloth', 'The Cream Diamond Wrapper', 'Wrapper', 95000),
+  ('ember-cloth', 'The Ember Wrapper',          'Wrapper', 110000),
+  ('plum-cloth',  'The Plum Border Wrapper',    'Wrapper', 90000)
 on conflict (slug) do update
   set name = excluded.name, kind = excluded.kind, price_ngn = excluded.price_ngn;
 

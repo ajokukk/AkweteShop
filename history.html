@@ -83,6 +83,7 @@ footer{background:var(--ink);color:#bdb7a3;padding:44px var(--pad);display:flex;
 footer b{font:400 28px var(--serif);color:var(--cotton)}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.ev{opacity:1;transform:none;transition:none}.fig img{transition:none}}
 </style>
+<link rel="stylesheet" href="css/menu.css">
 </head>
 <body>
 
@@ -95,10 +96,22 @@ footer b{font:400 28px var(--serif);color:var(--cotton)}
     <a href="index.html#build">Build</a>
   </nav>
   <div class="tools">
-    <button class="pill" data-auth>Sign in</button>
+    <button class="pill hide-m" data-auth>Sign in</button>
     <a class="pill" href="checkout.html">Bag (<span data-bag-count>0</span>)</a>
+    <button class="pill menu-btn" id="menuBtn" aria-expanded="false" aria-controls="menu">Menu</button>
   </div>
 </header>
+
+<nav class="menu" id="menu" aria-label="Main menu">
+  <button class="pill menu-close" aria-label="Close menu">Close</button>
+  <a class="ml" href="index.html#weave">The cloth</a>
+  <a class="ml" href="index.html#motifs">Motifs</a>
+  <a class="ml" href="index.html#craft">Craft</a>
+  <a class="ml" href="#story">History</a>
+  <a class="ml" href="index.html#shop">Shop</a>
+  <a class="ml" href="index.html#build">Build</a>
+  <div class="menu-tools"><button class="pill" data-auth>Sign in</button></div>
+</nav>
 
 <main>
 <section class="hero">
@@ -109,7 +122,7 @@ footer b{font:400 28px var(--serif);color:var(--cotton)}
 
 <section class="sec" id="story">
   <h2 class="big">How it came to be.</h2>
-  <p class="lede">Dates for Akwete are debated. This timeline follows published accounts and says so where the record is uncertain.</p>
+  <p class="lede">Part of Akwete&rsquo;s story is written down and part is remembered, so dates and names differ between accounts.</p>
   <div class="tl" id="tl">
     <span class="fill" aria-hidden="true"></span>
 
@@ -159,7 +172,7 @@ footer b{font:400 28px var(--serif);color:var(--cotton)}
 
 <section class="sec" id="motifs-record">
   <h2 class="big">Motifs on record.</h2>
-  <p class="lede">A few of the named patterns and what published accounts say about them. Meanings differ between accounts, so treat these as starting points to confirm with weavers.</p>
+  <p class="lede">A few of the named patterns and what published accounts say about them. Meanings differ from source to source.</p>
   <div class="mot">
     <article class="mc"><img src="assets/motifs/ikaki.png" alt="Ikaki tortoise motif"><h3>Ikaki</h3><small>Tortoise</small>
       <p>The most commonly woven motif. Traditionally linked to royalty and chieftaincy, to wisdom and cunning, and to peace. It is also tied to the tortoise as the hero of many Igbo fables. Accounts describe three kinds, including one that grew from the Ijebu prestige cloth Aso Olona.</p></article>
@@ -168,7 +181,7 @@ footer b{font:400 28px var(--serif);color:var(--cotton)}
     <article class="mc"><img src="assets/motifs/akpukpa.jpg" alt="Akpukpa geometric motif"><h3>Akpukpa</h3><small>Geometric</small>
       <p>One of the four main Akwete patterns named in popular summaries. It is vibrant, worn to chieftaincy ceremonies and weddings, and the one buyers from outside the community most often choose. Some writers also use the word for Akwete motifs in general.</p></article>
     <article class="mc"><img src="assets/motifs/nki.jpg" alt="Nki comb motif"><h3>Nki</h3><small>Comb, teeth</small>
-      <p>Akwete motifs are often named for what they look like. Comb sits alongside recorded names such as children's fingers, earring, snake-back and stool. No published meaning for Nki itself was found, so none is claimed here.</p></article>
+      <p>Akwete motifs are often named for what they look like. Comb sits alongside recorded names such as children's fingers, earring, snake-back and stool. A meaning for Nki is not yet recorded here.</p></article>
     <article class="mc"><h3>The four main patterns</h3><small>As popularly summarised</small>
       <p>Etirieti is plainer, mostly stripes and squares. Akpukpa is vibrant. Ahia is complex and depends on the number of heddles. Ogbanaonweya is intricate and used mostly within the Akwete community.</p></article>
     <article class="mc"><h3>Akwa Miri</h3><small>Cloth of the water</small>
@@ -196,7 +209,6 @@ footer b{font:400 28px var(--serif);color:var(--cotton)}
       <figure class="fig" style="--w:min(100%,460px)"><button data-i="4"><img src="assets/people/ajoku.jpg" alt="Mrs Treasuremaria Ajoku on the stairs, wrapped in Akwete cloth with a red gele and coral beads"></button>
         <figcaption><b>Mrs Treasuremaria Ajoku</b><span>At her son's child dedication, wrapped in Akwete.</span></figcaption></figure>
     </div>
-    <p class="fine">Captions are as supplied by the site owner. Before this page goes public, add photo credits and confirm you have permission to publish each image, especially the press photographs.</p>
   </div>
 </section>
 
@@ -233,6 +245,7 @@ footer b{font:400 28px var(--serif);color:var(--cotton)}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="js/config.js"></script>
 <script src="js/shared.js"></script>
+<script src="js/menu.js"></script>
 <script>
 (function(){
   'use strict';

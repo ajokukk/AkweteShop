@@ -1,0 +1,21 @@
+/* Mobile menu overlay, shared by index.html and history.html */
+.menu-btn{display:none}
+.menu{position:fixed;inset:0;z-index:90;background:var(--ink);color:var(--cotton);display:flex;flex-direction:column;justify-content:center;gap:6px;
+  padding:calc(70px + env(safe-area-inset-top,0px)) var(--pad) calc(40px + env(safe-area-inset-bottom,0px));overflow:auto;
+  opacity:0;visibility:hidden;transform:translateY(-14px);
+  transition:opacity .35s,transform .45s cubic-bezier(.2,.8,.2,1),visibility 0s .45s}
+.menu.on{opacity:1;visibility:visible;transform:none;transition-delay:0s}
+.menu a.ml{font:400 clamp(40px,12vw,64px)/1.15 var(--serif);text-decoration:none;padding:4px 0;color:inherit}
+.menu a.ml:active{color:var(--thread)}
+.menu .menu-tools{display:flex;gap:10px;margin-top:28px;flex-wrap:wrap}
+.menu .menu-close{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:var(--pad)}
+.menu .pill{cursor:pointer;background:none;color:inherit;border:1px solid currentColor;border-radius:99px;padding:8px 18px;font-size:15px}
+.menu .pill[aria-pressed=true]{background:var(--cotton);color:var(--ink)}
+@media(max-width:760px){
+  .menu-btn{display:inline-flex}
+  .hide-m{display:none!important}
+  .tools{gap:8px}
+  .pill{white-space:nowrap;padding:5px 12px;font-size:13px}
+  .brand{font-size:24px}
+}
+@media(prefers-reduced-motion:reduce){.menu{transition-duration:.01s}}
