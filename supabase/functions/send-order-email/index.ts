@@ -18,6 +18,26 @@ const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json" } });
 const esc = (s: unknown) =>
   String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+const TEXT = {
+  en: {
+    subject: (n: string) => `Your Akwete order ${n}`,
+    thanks: (name: string) => `Thank you, ${name}.`,
+    received: "We have received your order",
+    total: "Total",
+    delivery: "Delivery details",
+    note: "We will contact you to confirm production time and payment. Reply to this email if anything above is wrong.",
+    noteText: "We will contact you to confirm production time and payment.",
+  },
+  ig: {
+    subject: (n: string) => `Iwu ahịa Akwete gị ${n}`,
+    thanks: (name: string) => `Daalụ, ${name}.`,
+    received: "Anabatala iwu ahịa gị",
+    total: "Mkpokọta",
+    delivery: "Nkọwa nnyefe",
+    note: "Anyị ga-akpọtụrụ gị ka anyị kwenye na oge a ga-ewere rụọ ya na ịkwụ ụgwọ. Zaa imeel a ma ọ bụrụ na ihe ọ bụla dị n’elu adịghị mma.",
+    noteText: "Anyị ga-akpọtụrụ gị ka anyị kwenye na oge a ga-ewere rụọ ya na ịkwụ ụgwọ.",
+  },
+} as const;
 const naira = (n: number) => "\u20A6" + Number(n).toLocaleString("en-NG");
 
 Deno.serve(async (req) => {
@@ -41,8 +61,10 @@ Deno.serve(async (req) => {
     const { data: { user } } = await asUser.auth.getUser();
     if (!user) return json({ error: "Not signed in" }, 401);
 
-    const { order_id } = await req.json();
+    const body = await req.json();
+    const order_id = body.order_id;
     if (typeof order_id !== "string") return json({ error: "order_id is required" }, 400);
+    const L = TEXT[body.lang === "ig" ? "ig" : "en"];
 
     // 2. Load the order. RLS only returns it if it belongs to this user.
     const { data: order, error } = await asUser
@@ -66,35 +88,35 @@ Deno.serve(async (req) => {
       <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff">
         <tr><td style="background:#0d1330;color:#ece6d8;padding:28px;font-family:Georgia,serif;font-size:28px">Akwete</td></tr>
         <tr><td style="padding:28px">
-          <h1 style="font-family:Georgia,serif;font-weight:400;font-size:28px;margin:0 0 8px">Thank you, ${esc(String(order.full_name).split(" ")[0])}.</h1>
-          <p style="margin:0 0 20px">We have received your order <strong>${esc(order.order_number)}</strong>.</p>
+          <h1 style="font-family:Georgia,serif;font-weight:400;font-size:28px;margin:0 0 8px">${esc(L.thanks(String(order.full_name).split(" ")[0]))}</h1>
+          <p style="margin:0 0 20px">${esc(L.received)} <strong>${esc(order.order_number)}</strong>.</p>
           <table width="100%" cellpadding="0" cellspacing="0">${rows}
-            <tr><td style="padding:14px 0;font-size:18px"><strong>Total</strong></td>
+            <tr><td style="padding:14px 0;font-size:18px"><strong>${esc(L.total)}</strong></td>
                 <td style="padding:14px 0;text-align:right;font-size:18px"><strong>${naira(order.total_ngn)}</strong></td></tr>
           </table>
-          <h2 style="font-family:Georgia,serif;font-weight:400;font-size:20px;margin:24px 0 6px">Delivery details</h2>
+          <h2 style="font-family:Georgia,serif;font-weight:400;font-size:20px;margin:24px 0 6px">${esc(L.delivery)}</h2>
           <p style="margin:0;color:#3a3a3a">${esc(order.full_name)}<br>${esc(order.address)}<br>${esc(order.city)}, ${esc(order.state)}<br>${esc(order.phone)}</p>
-          <p style="margin:24px 0 0;color:#55534d;font-size:14px">We will contact you to confirm production time and payment. Reply to this email if anything above is wrong.</p>
+          <p style="margin:24px 0 0;color:#55534d;font-size:14px">${esc(L.note)}</p>
         </td></tr>
       </table></td></tr></table></body></html>`;
 
     const text = [
-      `Thank you, ${String(order.full_name).split(" ")[0]}.`,
-      `We have received your order ${order.order_number}.`,
+      L.thanks(String(order.full_name).split(" ")[0]),
+      `${L.received} ${order.order_number}.`,
       "",
       ...items.map((i) => `- ${i.name}${i.quantity > 1 ? " x" + i.quantity : ""} (${i.detail}): ${naira(i.unit_price_ngn * i.quantity)}`),
-      `Total: ${naira(order.total_ngn)}`,
+      `${L.total}: ${naira(order.total_ngn)}`,
       "",
-      `Delivery: ${order.full_name}, ${order.address}, ${order.city}, ${order.state}. ${order.phone}`,
+      `${L.delivery}: ${order.full_name}, ${order.address}, ${order.city}, ${order.state}. ${order.phone}`,
       "",
-      "We will contact you to confirm production time and payment.",
+      L.noteText,
     ].join("\n");
 
     // 4. Send through Mailgun.
     const form = new FormData();
     form.append("from", from);
     form.append("to", order.email);
-    form.append("subject", `Your Akwete order ${order.order_number}`);
+    form.append("subject", L.subject(order.order_number));
     form.append("text", text);
     form.append("html", html);
 
