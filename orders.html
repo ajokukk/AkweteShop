@@ -8,19 +8,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Gloock&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/pages.css">
+<link rel="stylesheet" href="css/nav.css">
 </head>
-<body>
-<header class="top">
-  <a class="brand" href="index.html">Akwete</a>
-  <div class="tools">
-    <a class="pill" href="index.html#shop">Shop</a>
-    <a class="pill" href="checkout.html">Bag (<span data-bag-count>0</span>)</a>
-    <button class="pill" id="outBtn" hidden>Sign out</button>
-  </div>
-</header>
+<body data-page="orders">
 
 <main class="wrap" style="max-width:820px">
+  <a class="back" href="index.html#shop">← Back to the shop</a>
   <h1>My orders</h1>
+  <button class="btn ghost" id="outBtn" hidden style="margin:-10px 0 26px">Sign out</button>
   <div class="warn" id="cfgWarn" hidden>
     The database is not connected yet. Add your Supabase URL and anon key in <code>js/config.js</code>, then reload.
   </div>
@@ -34,7 +29,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="js/config.js"></script>
+<script src="js/lang/ig.js"></script>
+<script src="js/i18n.js"></script>
 <script src="js/shared.js"></script>
+<script src="js/nav.js"></script>
 <script>
 (function () {
   'use strict';

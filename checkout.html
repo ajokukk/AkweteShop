@@ -8,17 +8,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Gloock&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/pages.css">
+<link rel="stylesheet" href="css/nav.css">
 </head>
-<body>
-<header class="top">
-  <a class="brand" href="index.html">Akwete</a>
-  <div class="tools">
-    <a class="pill" href="index.html#shop">Keep shopping</a>
-    <button class="pill" data-auth>Sign in</button>
-  </div>
-</header>
+<body data-page="checkout">
 
 <main class="wrap">
+  <a class="back" href="index.html#shop">← Back to the shop</a>
   <h1>Checkout</h1>
 
   <div class="warn" id="cfgWarn" hidden>
@@ -30,7 +25,7 @@
     <a class="btn" href="index.html#shop">Browse the shop</a>
   </div>
 
-  <div class="grid" id="main">
+  <div class="grid" id="orderGrid">
     <form id="form">
       <div class="authbox" id="authbox"></div>
 
@@ -72,7 +67,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="js/config.js"></script>
+<script src="js/lang/ig.js"></script>
+<script src="js/i18n.js"></script>
 <script src="js/shared.js"></script>
+<script src="js/nav.js"></script>
 <script>
 (function () {
   'use strict';
@@ -93,7 +91,7 @@
   function renderSummary() {
     var bag = AK.getBag();
     $('#empty').hidden = bag.length > 0 || placed;
-    $('#main').hidden = bag.length === 0 || placed;
+    $('#orderGrid').hidden = bag.length === 0 || placed;
     $('#lines').innerHTML = bag.map(function (b) {
       return '<li><b>' + esc(b.name) + (b.qty > 1 ? ' &times; ' + b.qty : '') + '</b><span>' + AK.naira(b.price * b.qty) + '</span><small>' + esc(b.detail) + '</small></li>';
     }).join('');
@@ -148,12 +146,12 @@
 
     var emailed = false;
     try {
-      var mail = await AK.sb.functions.invoke('send-order-email', { body: { order_id: order.id } });
+      var mail = await AK.sb.functions.invoke('send-order-email', { body: { order_id: order.id, lang: window.AKI ? AKI.lang : 'en' } });
       emailed = !mail.error;
       if (mail.error) console.warn('Confirmation email failed:', mail.error);
     } catch (x) { console.warn('Confirmation email failed:', x); }
 
-    $('#main').hidden = true; $('#empty').hidden = true; $('#done').hidden = false;
+    $('#orderGrid').hidden = true; $('#empty').hidden = true; $('#done').hidden = false;
     $('#doneNum').textContent = order.order_number;
     $('#doneTotal').textContent = AK.naira(order.total_ngn);
     $('#doneEmail').textContent = emailed

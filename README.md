@@ -11,6 +11,16 @@ This covers the four requirements of the task:
 
 Supabase was chosen because it gives you the database and Google sign-in in one place. Neon is only a database, so you would need to add a separate auth layer.
 
+## Language: English and Igbo
+Every page has an **Igbo / English** button in the header (and in the mobile menu and footer). The choice is remembered, and `?lang=ig` in a link opens a page in Igbo.
+- All Igbo text lives in one file: `js/lang/ig.js`. The site is written in English, and that file maps each English line to its Igbo version, so you can improve a translation without touching any page.
+- Anything not listed in `ig.js` simply stays in English. After adding new text to a page, add a matching line in `ig.js`.
+- The order confirmation email is sent in the language the customer was using.
+- The Igbo is a first draft. Have a fluent Igbo speaker review it before launch, especially the words for loom, motifs and weaving terms.
+
+## Navigation
+Every page shares one header, mobile menu and footer (built by `js/nav.js`, styled by `css/nav.css`). Each page has a "skip to content" link, a back link, a back-to-top button, and the home page highlights the section you are reading.
+
 ## What is in the folder
 
 ```
@@ -18,8 +28,11 @@ index.html                  the interactive shop (bag now saved to the database 
 checkout.html               checkout
 orders.html                 "My orders"
 css/pages.css               styles for checkout and orders
+history.html                the history of Akwete
 js/config.js                YOUR Supabase URL + anon key go here
 js/shared.js                Supabase client, Google sign-in, bag syncing
+js/nav.js, css/nav.css      shared header, mobile menu, footer, back-to-top
+js/i18n.js, js/lang/ig.js   language switching and the Igbo dictionary
 assets/images.js            embedded product and motif images
 supabase/schema.sql         tables, row level security, place_order()
 supabase/functions/send-order-email/index.ts    Mailgun email
