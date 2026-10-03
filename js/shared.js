@@ -69,6 +69,24 @@
     });
   }
 
+  /* ---------- confirmation email ---------- */
+  // Calls the send-order-email function. Resolves to { ok, reason } and never throws.
+  AK.sendConfirmation = function (orderId) {
+    if (!sb) return Promise.resolve({ ok: false, reason: 'not configured' });
+    return sb.functions.invoke('send-order-email', { body: { order_id: orderId, lang: window.AKI ? window.AKI.lang : 'en' } })
+      .then(function (r) {
+        if (!r.error) return { ok: true, reason: '' };
+        var ctx = r.error.context, status = ctx && ctx.status ? ctx.status : '';
+        var read = ctx && typeof ctx.json === 'function' ? ctx.json().catch(function () { return {}; }) : Promise.resolve({});
+        return read.then(function (b) {
+          var reason = (status ? status + ' ' : '') + ((b && (b.error || b.message)) || r.error.message || 'unknown error') + (b && b.detail ? ' (' + b.detail + ')' : '');
+          console.warn('Confirmation email failed:', reason);
+          return { ok: false, reason: reason };
+        });
+      })
+      .catch(function (e) { console.warn('Confirmation email failed:', e); return { ok: false, reason: String(e && e.message || e) }; });
+  };
+
   /* ---------- auth ---------- */
   AK.ready = sb
     ? sb.auth.getSession().then(function (r) { AK.user = r.data.session ? r.data.session.user : null; paint(); if (AK.user) pullCart(); })
