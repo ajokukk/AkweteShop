@@ -12,12 +12,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--thread);outline-offset:3px}
 [hidden]{display:none!important}
 
-.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px var(--pad);background:var(--ink);color:var(--cotton);position:sticky;top:0;z-index:5}
-.brand{font:400 27px var(--serif);text-decoration:none}
-.tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.pill{border:1px solid currentColor;border-radius:99px;padding:6px 14px;font-size:14px;font-weight:500;background:none;cursor:pointer;text-decoration:none;line-height:1.3;color:inherit}
-
-.wrap{max-width:1180px;margin:0 auto;padding:clamp(36px,7vh,80px) var(--pad) 110px}
+.wrap{max-width:1180px;margin:0 auto;padding:clamp(104px,15vh,140px) var(--pad) 90px}
 h1{font:400 clamp(46px,8vw,100px)/1 var(--serif);letter-spacing:-.015em;margin-bottom:32px}
 h2{font:400 26px/1.15 var(--serif)}
 .grid{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:clamp(28px,5vw,72px);align-items:start}
@@ -62,7 +57,6 @@ textarea{min-height:90px;resize:vertical}
 .order li{display:flex;justify-content:space-between;gap:12px}
 .badge{display:inline-block;border-radius:99px;padding:2px 12px;font-size:14px;font-weight:600;background:var(--cotton)}
 
-@media(max-width:560px){.pill{white-space:nowrap;padding:5px 11px;font-size:13px}.brand{font-size:24px}}
 @media(max-width:860px){
   .grid{grid-template-columns:1fr}
   .summary{position:static;order:-1}

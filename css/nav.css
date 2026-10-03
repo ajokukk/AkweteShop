@@ -1,0 +1,66 @@
+/* Site chrome shared by every page: skip link, header, mobile menu, footer, back links, back-to-top. */
+.skip{position:fixed;left:12px;top:-60px;z-index:200;background:var(--cotton);color:var(--ink);padding:10px 18px;border-radius:99px;font-weight:600;text-decoration:none;transition:top .2s}
+.skip:focus{top:12px}
+
+.pill{display:inline-flex;align-items:center;justify-content:center;border:1px solid currentColor;border-radius:99px;padding:6px 14px;font-size:14px;font-weight:500;line-height:1.3;background:none;color:inherit;cursor:pointer;text-decoration:none;white-space:nowrap}
+.pill[aria-pressed=true]{background:var(--cotton);color:var(--ink)}
+
+/* header */
+.hd{position:fixed;inset:0 0 auto 0;z-index:60;display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:calc(12px + env(safe-area-inset-top,0px)) var(--pad) 12px;color:var(--cotton);
+  background:linear-gradient(to bottom,rgba(13,19,48,.92),rgba(13,19,48,.66));backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.brand{font:400 27px var(--serif);text-decoration:none;color:inherit;flex:none}
+.hd-links{display:flex;gap:clamp(14px,2vw,30px);min-width:0}
+.hd-links a{text-decoration:none;font-weight:500;font-size:15px;padding:6px 0;border-bottom:2px solid transparent;white-space:nowrap}
+.hd-links a:hover{border-bottom-color:rgba(236,230,216,.5)}
+.hd-links a[aria-current]{border-bottom-color:var(--thread)}
+.tools{display:flex;gap:8px;align-items:center;flex:none}
+.menu-btn{display:none}
+
+/* mobile menu overlay */
+.menu{position:fixed;inset:0;z-index:90;background:var(--ink);color:var(--cotton);display:flex;flex-direction:column;justify-content:center;gap:4px;
+  padding:calc(76px + env(safe-area-inset-top,0px)) var(--pad) calc(40px + env(safe-area-inset-bottom,0px));overflow:auto;
+  opacity:0;visibility:hidden;transform:translateY(-14px);
+  transition:opacity .35s,transform .45s cubic-bezier(.2,.8,.2,1),visibility 0s .45s}
+.menu.on{opacity:1;visibility:visible;transform:none;transition-delay:0s}
+.menu a.ml{font:400 clamp(34px,10vw,58px)/1.15 var(--serif);text-decoration:none;padding:3px 0;color:inherit;display:block}
+.menu a.ml[aria-current]{color:var(--thread)}
+.menu a.ml:active{color:var(--thread)}
+.menu .menu-tools{display:flex;gap:10px;margin-top:26px;flex-wrap:wrap}
+.menu .menu-tools .pill{padding:9px 18px;font-size:15px}
+.menu .menu-close{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:var(--pad);padding:8px 18px;font-size:15px}
+
+@media(max-width:1100px){
+  .hd-links,.hide-m{display:none!important}
+  .menu-btn{display:inline-flex}
+}
+@media(max-width:560px){
+  .brand{font-size:24px}
+  .tools{gap:6px}
+  .pill{padding:5px 11px;font-size:13px}
+  .hd{gap:8px}
+}
+
+/* back link */
+.back{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-weight:600;font-size:15px;margin-bottom:26px;padding:6px 0;border-bottom:2px solid transparent}
+.back:hover{border-bottom-color:currentColor}
+
+/* footer */
+.site-footer{background:var(--ink);color:#bdb7a3;padding:clamp(40px,7vh,70px) var(--pad) calc(36px + env(safe-area-inset-bottom,0px));
+  display:grid;grid-template-columns:1.4fr 1fr 1fr auto;gap:30px 40px;align-items:start;border-top:1px solid rgba(236,230,216,.15);font-size:15px}
+.site-footer b{font:400 30px var(--serif);color:var(--cotton);display:block;margin-bottom:6px}
+.site-footer h2{font:600 14px var(--sans);color:var(--cotton);margin-bottom:10px}
+.site-footer ul{list-style:none;padding:0;display:grid;gap:6px}
+.site-footer a{text-decoration:none}
+.site-footer a:hover{color:var(--cotton);text-decoration:underline;text-underline-offset:4px}
+.site-footer .pill{color:var(--cotton)}
+.ft-top{justify-self:end;color:var(--cotton);border:1px solid currentColor;border-radius:99px;padding:8px 18px;font-weight:500;font-size:14px;background:none;cursor:pointer;white-space:nowrap}
+@media(max-width:860px){.site-footer{grid-template-columns:1fr 1fr}.ft-top{justify-self:start}}
+@media(max-width:480px){.site-footer{grid-template-columns:1fr}}
+
+/* back to top */
+.totop{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:50;width:46px;height:46px;border-radius:50%;
+  background:var(--ink);color:var(--cotton);border:1px solid rgba(236,230,216,.4);font-size:20px;line-height:1;cursor:pointer;
+  opacity:0;transform:translateY(12px);pointer-events:none;transition:opacity .3s,transform .3s}
+.totop.on{opacity:1;transform:none;pointer-events:auto}
+@media(prefers-reduced-motion:reduce){.menu,.totop,.skip{transition-duration:.01s}}
