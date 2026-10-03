@@ -150,7 +150,7 @@ h1,h2,h3{font-weight:400}
 
 /* ============ SHOP ============ */
 .shop{background:var(--paper);overflow-x:clip}
-.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(36px,5vw,72px) clamp(20px,3vw,48px);padding:20px var(--pad) clamp(100px,20vh,220px);align-items:start}
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(36px,5vw,72px) clamp(20px,3vw,48px);padding:20px var(--pad) clamp(100px,20vh,220px);align-items:start;margin-top:24px;}
 .card{display:block;text-align:left;will-change:transform}
 .card:nth-child(3n+2){margin-top:14vh}
 .card:nth-child(3n){margin-top:5vh}
@@ -222,8 +222,6 @@ h1,h2,h3{font-weight:400}
 <link rel="stylesheet" href="css/nav.css">
 </head>
 <body data-page="home" data-has-sound>
-
-</nav>
 
 <main>
 <!-- ===== HERO: threads weave the page ===== -->
@@ -455,8 +453,7 @@ function thunk(){try{const c=snd.ctx,o=c.createOscillator(),g=c.createGain();
   o.connect(g);g.connect(snd.master);o.start();o.stop(c.currentTime+.16);}catch(e){}}
 function beat(){snd.n++;const k=snd.n%4;if(k===1)noise(.07,1800,2,.55);else if(k===3)noise(.07,1050,2,.45);else if(k===0)thunk()}
 const tick=()=>{if(snd.on)noise(.03,3400,3,.3)};
-const paintSound=()=>$$('[data-sound]').forEach(b=>{b.setAttribute('aria-pressed',snd.on);b.textContent=snd.on?'Sound on':'Sound off'});
-$$('[data-sound]').forEach(b=>b.addEventListener('click',()=>{
+const paintSound=()=>$$('[data-sound]').forEach(b=>{b.setAttribute('aria-pressed',snd.on);b.textContent=snd.on?'Sound on':'Sound off'}); $$('[data-sound]').forEach(b=>b.addEventListener('click',()=>{
   if(!snd.ctx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return toast('Audio is not supported in this browser.');
     snd.ctx=new AC();snd.master=snd.ctx.createGain();snd.master.gain.value=.35;snd.master.connect(snd.ctx.destination)}
   snd.on=!snd.on;paintSound();
@@ -617,7 +614,7 @@ makeLens($('#craftLens'),3.2);makeLens($('#prodLens'),3);
 /* ============ 5. SHOP, PRODUCT MODAL, BAG ============ */
 const gallery=$('#gallery');
 Object.values(PRODUCTS).forEach((p,i)=>{
-  const b=document.createElement('button');b.className='card'+(p.id.endsWith('-cloth')?' wide':'');b.dataset.speed=[.07,-.05,.11][i%3];
+  const b=document.createElement('button');b.className='card'+(p.id.endsWith('-cloth')?' wide':'');b.dataset.speed=[.07,.03,.11][i%3];
   b.innerHTML=`<div class="ph"><img src="${IMG[p.id]}" alt="${p.name}"><span class="look">Look closer</span></div>
   <div class="meta"><b>${p.name}</b><span>${naira(p.price)}</span></div><small>${p.kind}</small>`;
   b.addEventListener('click',()=>openProduct(p.id,b));b.addEventListener('pointerenter',tick);gallery.appendChild(b);
@@ -628,7 +625,8 @@ function openProduct(id,from){
   $('#pImg').src=IMG[id];$('#pImg').alt=curProd.name+', photograph';
   $('#pKind').textContent=curProd.kind;$('#pName').textContent=curProd.name;$('#pPrice').textContent=naira(curProd.price);
   const sz=$('#pSizes');sz.innerHTML=curProd.sizes.map((s,i)=>`<button class="chip" aria-pressed="${i===0}" data-s="${s}">${s}</button>`).join('');
-  $$('.chip',sz).forEach(c=>c.addEventListener('click',()=>{curSize=c.dataset.s;$$('.chip',sz).forEach(x=>x.setAttribute('aria-pressed',x===c));tick()}));
+  $$('.chip',sz).forEach(c=>c.addEventListener('click',()=>{curSize=c.dataset.s;$$
+('.chip',sz).forEach(x=>x.setAttribute('aria-pressed',x===c));tick()}));
   openPanel($('#prodPanel'),from);
 }
 $('#pAdd').addEventListener('click',()=>{addToBag({slug:curProd.id,name:curProd.name,detail:curSize,price:curProd.price});closePanels();toast('Added to your bag.')});
@@ -637,8 +635,7 @@ function renderBag(){
   const bag=AK.getBag();
   const bn=$('#bagN');if(bn)bn.textContent=AK.count();
   $('#bagList').innerHTML=bag.length?bag.map((b,i)=>`<li><b>${esc(b.name)}${b.qty>1?' × '+b.qty:''}</b><span>${naira(b.price*b.qty)}</span><small>${esc(b.detail)}</small><button class="rm" data-i="${i}">Remove</button></li>`).join(''):'<li><small>Your bag is empty. Add a piece from the shop.</small></li>';
-  $$('.rm').forEach(r=>r.addEventListener('click',()=>AK.removeAt(+r.dataset.i)));
-  $('#bagTotal').textContent=bag.length?'Total '+naira(AK.total()):'';
+  $$('.rm').forEach(r=>r.addEventListener('click',()=>AK.removeAt(+r.dataset.i)));$('#bagTotal').textContent=bag.length?'Total '+naira(AK.total()):'';
   $('#checkoutBtn').disabled=!bag.length;
 }
 const bagBtn=$('#bagBtn');if(bagBtn)bagBtn.addEventListener('click',e=>openPanel($('#bagPanel'),e.currentTarget));
@@ -646,11 +643,12 @@ $('#checkoutBtn').addEventListener('click',()=>{location.href='checkout.html'});
 addEventListener('bagchange',renderBag);
 renderBag();
 
-/* Floating gallery: cards drift at different speeds as you scroll */
+/* Floating gallery: cards drift at different positive speeds as you scroll */
 function parallax(){
-  if(!matchMedia('(min-width:861px)').matches||RM){$$('.card',gallery).forEach(c=>c.style.transform='');return}
-  const r=gallery.getBoundingClientRect(),d=innerHeight/2-(r.top+r.height/2);
-  $$('.card',gallery).forEach(c=>c.style.transform=`translate3d(0,${(d*c.dataset.speed).toFixed(1)}px,0)`);
+  if(!matchMedia('(min-width:861px)').matches||RM){$$('.card',gallery).forEach(c=>c.style.transform='');return}   const r=gallery.getBoundingClientRect(),d=innerHeight/2-(r.top+r.height/2);   $$('.card',gallery).forEach(c=>{
+    const ty = Math.max(0, d * c.dataset.speed);
+    c.style.transform=`translate3d(0,${ty.toFixed(1)}px,0)`;
+  });
 }
 
 /* ============ 6. BUILD YOUR AKWETE ============ */
@@ -690,7 +688,8 @@ function summary(){
 $$('[data-group]').forEach(g=>{
   const key=g.dataset.group;
   g.innerHTML=OPT[key].map(o=>`<button class="chip" data-v="${o[0]}" aria-pressed="${S[key]===o[0]}">${o[2]?`<i class="dot" style="background:${o[2]}"></i>`:''}${o[1]}</button>`).join('');
-  $$('.chip',g).forEach(c=>c.addEventListener('click',()=>{S[key]=c.dataset.v;$$('.chip',g).forEach(x=>x.setAttribute('aria-pressed',x===c));summary();playBuild();tick()}));
+  $$('.chip',g).forEach(c=>c.addEventListener('click',()=>{S[key]=c.dataset.v;$$
+('.chip',g).forEach(x=>x.setAttribute('aria-pressed',x===c));summary();playBuild();tick()}));
 });
 $('#reqBtn').addEventListener('click',()=>{const est=summary(),pc=PIECE[S.piece];
   addToBag({custom:true,piece:S.piece,name:`Custom ${pc.label.toLowerCase()}`,detail:`${pc.size} · ${PAL[S.base].label} · ${MOTIFS[S.a].name} + ${MOTIFS[S.b].name} · ${S.arr}`,price:est});toast('Custom piece added to your bag.')});
@@ -710,10 +709,8 @@ function closePanels(){
   document.body.style.overflow='';if(lastFocus&&lastFocus.focus)lastFocus.focus();
 }
 $('#scrim').addEventListener('click',closePanels);
-$$('[data-close]').forEach(b=>b.addEventListener('click',closePanels));
-addEventListener('keydown',e=>{
-  if(e.key==='Escape')closePanels();
-  if(e.key==='Tab'&&openEl){const f=$$('button,a[href]',openEl).filter(x=>x.offsetParent!==null);
+$$('[data-close]').forEach(b=>b.addEventListener('click',closePanels)); addEventListener('keydown',e=>{   if(e.key==='Escape')closePanels();   if(e.key==='Tab'&&openEl){const f=$$
+('button,a[href]',openEl).filter(x=>x.offsetParent!==null);
     if(!f.length)return;const a=f[0],z=f[f.length-1];
     if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}}
 });
