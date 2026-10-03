@@ -8,13 +8,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Gloock&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/pages.css">
+<style>.menu:not(.on){visibility:hidden;pointer-events:none}.menu{position:fixed;inset:0}</style>
 <link rel="stylesheet" href="css/nav.css">
 </head>
 <body data-page="checkout">
 
 <main class="wrap">
   <a class="back" href="index.html#shop">← Back to the shop</a>
-  <h1>Checkout</h1>
+  <h1 id="pageTitle">Checkout</h1>
 
   <div class="warn" id="cfgWarn" hidden>
     The database is not connected yet. Add your Supabase URL and anon key in <code>js/config.js</code>, then reload.
@@ -57,6 +58,8 @@
     <h1>Order received.</h1>
     <p class="num" id="doneNum"></p>
     <p id="doneEmail"></p>
+    <p><button type="button" class="btn ghost" id="resendBtn" hidden>Resend confirmation email</button></p>
+    <p class="err" id="resendMsg" role="status"></p>
     <p class="fine">Total <strong id="doneTotal"></strong>. We will contact you to confirm production time and payment.</p>
     <div class="btns">
       <a class="btn" href="orders.html">View my orders</a>
@@ -75,6 +78,10 @@
 (function () {
   'use strict';
   var $ = function (s) { return document.querySelector(s); };
+  if (!window.AK) {
+    document.querySelector('main').insertAdjacentHTML('afterbegin', '<div class="warn" role="alert">Part of this page did not load correctly. Please refresh. (Site owner: missing js/shared.js. See check.html.)</div>');
+    return;
+  }
   var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); };
   var STATES = ['Abia','Adamawa','Akwa Ibom','Anambra','Bauchi','Bayelsa','Benue','Borno','Cross River','Delta','Ebonyi','Edo','Ekiti','Enugu','FCT Abuja','Gombe','Imo','Jigawa','Kaduna','Kano','Katsina','Kebbi','Kogi','Kwara','Lagos','Nasarawa','Niger','Ogun','Ondo','Osun','Oyo','Plateau','Rivers','Sokoto','Taraba','Yobe','Zamfara'];
   var FIELDS = ['name', 'email', 'phone', 'address', 'city', 'state', 'notes'];
@@ -144,19 +151,24 @@
     AK.clearBag();
     sessionStorage.removeItem(DRAFT);
 
-    var emailed = false;
-    try {
-      var mail = await AK.sb.functions.invoke('send-order-email', { body: { order_id: order.id, lang: window.AKI ? AKI.lang : 'en' } });
-      emailed = !mail.error;
-      if (mail.error) console.warn('Confirmation email failed:', mail.error);
-    } catch (x) { console.warn('Confirmation email failed:', x); }
+    var sent = await AK.sendConfirmation(order.id);
+    var emailed = sent.ok;
 
-    $('#orderGrid').hidden = true; $('#empty').hidden = true; $('#done').hidden = false;
+    $('#orderGrid').hidden = true; $('#empty').hidden = true; $('#pageTitle').hidden = true; $('#done').hidden = false;
     $('#doneNum').textContent = order.order_number;
     $('#doneTotal').textContent = AK.naira(order.total_ngn);
     $('#doneEmail').textContent = emailed
       ? 'A confirmation email is on its way to ' + v.email + '.'
       : 'Your order is saved. The confirmation email could not be sent just now, but you can see the order under My orders.';
+    $('#resendBtn').hidden = emailed;
+    $('#resendBtn').onclick = async function () {
+      var btn = this, msg = $('#resendMsg');
+      btn.disabled = true; msg.textContent = 'Sending...';
+      var r = await AK.sendConfirmation(order.id);
+      btn.disabled = false;
+      if (r.ok) { btn.hidden = true; msg.textContent = 'Confirmation email sent.'; $('#doneEmail').textContent = 'A confirmation email is on its way to ' + v.email + '.'; }
+      else msg.textContent = 'We still could not send the email. Please try again later.';
+    };
     window.scrollTo(0, 0);
   });
 

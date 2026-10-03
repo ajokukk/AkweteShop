@@ -95,6 +95,21 @@ Open http://localhost:3000, add a piece, go to checkout, sign in with Google, pl
 ### 5. Deploy
 Any static host works (Vercel, Netlify, Cloudflare Pages, GitHub Pages). Then add the live URL to Google's authorized origins and Supabase's redirect URLs.
 
+## After you deploy: open check.html
+Open `https://YOUR-SITE/check.html`. It lists every file the site needs and marks any that are missing, and it warns if `js/config.js` still has the placeholder Supabase values or if an old `index.html` is live. Fix anything marked red before testing.
+
+Always upload the **whole folder with the same sub-folder names** (`css/`, `js/`, `js/lang/`, `assets/` and its sub-folders, `supabase/` is for Supabase only). The `js/menu.js` and `css/menu.css` files from earlier versions are no longer used; you can delete them.
+
+A page that loses a support file now shows a red notice at the top instead of silently breaking, and the rest of the page keeps working.
+
+## If the confirmation email "could not be sent"
+The order is always saved first, so nothing is lost. The customer sees a **Resend confirmation email** button (also on My orders). To find the cause, open the browser console on the checkout page after ordering: it prints the real reason, for example:
+- `403 ... authorized recipients`: Mailgun sandbox only sends to addresses you added and activated under Authorized recipients.
+- `401`: wrong Mailgun key, or an EU account without the `MAILGUN_API_BASE` secret.
+- `Mailgun is not configured on the server`: the `MAILGUN_API_KEY` or `MAILGUN_DOMAIN` secret is missing.
+- `404` / `Failed to send a request to the Edge Function`: the function is not deployed, or not named exactly `send-order-email`.
+The same message appears in Supabase under Edge Functions > send-order-email > Logs.
+
 ## Troubleshooting sign-in
 - **"Unsupported provider: provider is not enabled"**: Google is not switched on in Supabase. Go to Authentication > Sign In / Providers > Google, turn it on, paste the Google Client ID and Client secret, and save.
 - **"redirect_uri_mismatch" from Google**: the Authorized redirect URI in Google Cloud Console must be exactly the callback URL shown on Supabase's Google provider page.

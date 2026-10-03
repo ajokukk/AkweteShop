@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Gloock&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/pages.css">
+<style>.menu:not(.on){visibility:hidden;pointer-events:none}.menu{position:fixed;inset:0}</style>
 <link rel="stylesheet" href="css/nav.css">
 </head>
 <body data-page="orders">
@@ -37,6 +38,10 @@
 (function () {
   'use strict';
   var $ = function (s) { return document.querySelector(s); };
+  if (!window.AK) {
+    document.querySelector('main').insertAdjacentHTML('afterbegin', '<div class="warn" role="alert">Part of this page did not load correctly. Please refresh. (Site owner: missing js/shared.js. See check.html.)</div>');
+    return;
+  }
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); };
   var STATUS = { pending: 'Received', confirmed: 'Confirmed', in_production: 'In production', shipped: 'Shipped', delivered: 'Delivered', cancelled: 'Cancelled' };
 
@@ -59,13 +64,21 @@
     $('#list').innerHTML = r.data.map(function (o) {
       var when = new Date(o.created_at).toLocaleDateString('en-NG', { day: 'numeric', month: 'long', year: 'numeric' });
       return '<article class="order"><header><strong>' + esc(o.order_number) + '</strong><span class="badge">' + esc(STATUS[o.status] || o.status) + '</span></header>' +
-        '<p class="fine">' + esc(when) + (o.confirmation_sent_at ? ' &middot; confirmation email sent' : '') + '</p>' +
+        '<p class="fine">' + esc(when) + (o.confirmation_sent_at ? ' &middot; confirmation email sent' : ' &middot; confirmation email not sent yet') + '</p>' +
+        (o.confirmation_sent_at ? '' : '<p><button type="button" class="btn ghost resend" data-id="' + esc(o.id) + '">Resend confirmation email</button> <span class="fine" role="status"></span></p>') +
         '<ul>' + (o.order_items || []).map(function (i) {
           return '<li><span>' + esc(i.name) + (i.quantity > 1 ? ' &times; ' + i.quantity : '') + '<br><small class="fine">' + esc(i.detail) + '</small></span><span>' + AK.naira(i.unit_price_ngn * i.quantity) + '</span></li>';
         }).join('') + '</ul>' +
         '<p style="text-align:right"><strong>' + AK.naira(o.total_ngn) + '</strong></p></article>';
     }).join('');
   }
+  $('#list').addEventListener('click', async function (e) {
+    var btn = e.target.closest('.resend'); if (!btn) return;
+    var note = btn.parentNode.querySelector('.fine');
+    btn.disabled = true; note.textContent = 'Sending...';
+    var r = await AK.sendConfirmation(btn.dataset.id);
+    if (r.ok) { load(); } else { btn.disabled = false; note.textContent = 'We still could not send the email. Please try again later.'; }
+  });
   AK.ready.then(load);
   window.addEventListener('authchange', load);
 })();
