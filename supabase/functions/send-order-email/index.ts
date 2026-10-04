@@ -1,11 +1,11 @@
-// Supabase Edge Function: sends the order confirmation email through Mailgun.
+// Supabase Edge Function: sends the order confirmation email through Brevo or Mailgun.
 // Called by checkout.html right after place_order() succeeds.
 //
-// Secrets (set with `supabase secrets set ...`, never put these in the browser):
-//   MAILGUN_API_KEY   your Mailgun API key
-//   MAILGUN_DOMAIN    your sending domain, or the sandbox domain
-//   MAIL_FROM         optional, e.g. "Akwete <orders@mg.yourdomain.com>"
-//   MAILGUN_API_BASE  optional, use https://api.eu.mailgun.net for EU domains
+// Secrets (set under Edge Functions > Secrets, or with `supabase secrets set ...`; never put them in the browser):
+//   EMAIL_PROVIDER    "brevo" or "mailgun". If left out: Brevo when BREVO_API_KEY exists, otherwise Mailgun.
+//   MAIL_FROM         the sender, e.g. "Akwete <orders@yourdomain.com>". With Brevo it must be a sender you verified.
+//   Brevo:            BREVO_API_KEY
+//   Mailgun:          MAILGUN_API_KEY, MAILGUN_DOMAIN, optional MAILGUN_API_BASE (https://api.eu.mailgun.net for EU)
 // SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY are provided automatically.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
@@ -48,10 +48,16 @@ Deno.serve(async (req) => {
     const url = Deno.env.get("SUPABASE_URL")!;
     const anon = Deno.env.get("SUPABASE_ANON_KEY")!;
     const service = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const brevoKey = Deno.env.get("BREVO_API_KEY");
     const mgKey = Deno.env.get("MAILGUN_API_KEY");
     const mgDomain = Deno.env.get("MAILGUN_DOMAIN");
-    if (!mgKey || !mgDomain) return json({ error: "Mailgun is not configured on the server" }, 500);
-    const from = Deno.env.get("MAIL_FROM") ?? `Akwete <orders@${mgDomain}>`;
+    const wanted = (Deno.env.get("EMAIL_PROVIDER") ?? "").toLowerCase();
+    const provider = wanted === "brevo" || wanted === "mailgun" ? wanted : (brevoKey ? "brevo" : "mailgun");
+    if (provider === "brevo" && !brevoKey) return json({ error: "Brevo is not configured on the server (missing BREVO_API_KEY)" }, 500);
+    if (provider === "mailgun" && (!mgKey || !mgDomain)) return json({ error: "Mailgun is not configured on the server (missing MAILGUN_API_KEY or MAILGUN_DOMAIN)" }, 500);
+    console.log(`send-order-email v2: sending with ${provider}`);
+    const from = Deno.env.get("MAIL_FROM") ?? (mgDomain ? `Akwete <orders@${mgDomain}>` : "");
+    if (provider === "brevo" && !from) return json({ error: "MAIL_FROM is missing. Set it to your verified Brevo sender, e.g. Akwete <you@yourdomain.com>" }, 500);
     const base = Deno.env.get("MAILGUN_API_BASE") ?? "https://api.mailgun.net";
 
     // 1. Who is calling? Use the caller's own token so row level security applies.
@@ -112,23 +118,41 @@ Deno.serve(async (req) => {
       L.noteText,
     ].join("\n");
 
-    // 4. Send through Mailgun.
-    const form = new FormData();
-    form.append("from", from);
-    form.append("to", order.email);
-    form.append("subject", L.subject(order.order_number));
-    form.append("text", text);
-    form.append("html", html);
-
-    const res = await fetch(`${base}/v3/${mgDomain}/messages`, {
-      method: "POST",
-      headers: { Authorization: "Basic " + btoa("api:" + mgKey) },
-      body: form,
-    });
+    // 4. Send.
+    const subject = L.subject(order.order_number);
+    let res: Response;
+    if (provider === "brevo") {
+      // "Akwete <orders@yourdomain.com>"  ->  { name, email }
+      const m = from.match(/^\s*(?:"?([^"<]*?)"?\s*)?<([^>]+)>\s*$/);
+      const sender = m ? { name: (m[1] || "Akwete").trim(), email: m[2].trim() } : { name: "Akwete", email: from.trim() };
+      res = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: { "api-key": brevoKey!, "accept": "application/json", "content-type": "application/json" },
+        body: JSON.stringify({
+          sender,
+          to: [{ email: order.email, name: order.full_name }],
+          subject,
+          htmlContent: html,
+          textContent: text,
+        }),
+      });
+    } else {
+      const form = new FormData();
+      form.append("from", from);
+      form.append("to", order.email);
+      form.append("subject", subject);
+      form.append("text", text);
+      form.append("html", html);
+      res = await fetch(`${base}/v3/${mgDomain}/messages`, {
+        method: "POST",
+        headers: { Authorization: "Basic " + btoa("api:" + mgKey) },
+        body: form,
+      });
+    }
     if (!res.ok) {
       const detail = await res.text();
-      console.error("Mailgun error", res.status, detail);
-      return json({ error: "Mailgun rejected the message", status: res.status, detail }, 502);
+      console.error(`${provider} error`, res.status, detail);
+      return json({ error: `${provider === "brevo" ? "Brevo" : "Mailgun"} rejected the message`, status: res.status, detail }, 502);
     }
 
     // 5. Record that it was sent (service role, because customers cannot update orders).
