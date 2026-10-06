@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Akwete: from thread to story</title>
+<meta name="description" content="An interactive study of Akwete weaving: watch a cloth being woven, explore the motifs, look closely at the thread, and build your own piece.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Gloock&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --ink:#0d1330;        /* deep indigo-black */
+  --indigo:#1f2f5c;
+  --cotton:#ece6d8;     /* raw cotton */
+  --paper:#f6f2e8;
+  --moss:#1f3a2c;
+  --clay:#b4532f;
+  --thread:#c8962e;     /* used sparingly: focus + small highlights */
+  --char:#1b1b1d;
+  --serif:"Gloock",Georgia,"Times New Roman",serif;
+  --sans:"Figtree",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --pad:clamp(20px,4vw,56px);
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{background:var(--paper);color:var(--char);font:400 17px/1.55 var(--sans);overflow-x:clip}
+img,canvas{display:block;max-width:100%}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--thread);outline-offset:3px}
+h1,h2,h3{font-weight:400}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+
+/* ============ HERO ============ */
+.hero{position:relative;height:100svh;min-height:560px;background:var(--ink);color:var(--cotton);overflow:hidden}
+.hero canvas{position:absolute;inset:0;width:100%;height:100%;opacity:.92}
+.hero::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top,rgba(13,19,48,.95) 6%,rgba(13,19,48,.55) 42%,rgba(13,19,48,0) 85%)}
+.hero-copy{position:absolute;z-index:2;left:var(--pad);right:var(--pad);bottom:calc(var(--pad) + env(safe-area-inset-bottom,0px));display:grid;gap:22px;max-width:1100px}
+.hero h1{font:400 clamp(54px,11.5vw,184px)/.9 var(--serif);letter-spacing:-.02em}
+.hero p{max-width:44ch;font-size:clamp(16px,1.5vw,19px);color:#d8d2c0}
+.cta{display:inline-flex;background:var(--cotton);color:var(--ink);border-radius:99px;padding:14px 28px;font-weight:600;text-decoration:none;width:max-content;transition:background .2s,transform .3s var(--ease)}
+.cta:hover{background:#fff;transform:translateY(-2px)}
+/* the one orchestrated entrance on the page */
+.hero-copy>*{opacity:0;transform:translateY(18px);transition:opacity 1.1s var(--ease),transform 1.1s var(--ease)}
+.hero.ready .hero-copy>*{opacity:1;transform:none}
+.hero.ready .hero-copy>:nth-child(2){transition-delay:.25s}
+.hero.ready .hero-copy>:nth-child(3){transition-delay:.45s}
+
+/* ============ SCROLL = WEAVING ============ */
+.weave{position:relative;height:520vh;background:var(--ink);color:var(--cotton)}
+.stage{position:sticky;top:0;height:100svh;display:grid;grid-template-columns:1.1fr 1fr;align-items:center;gap:var(--pad);padding:0 var(--pad)}
+.words{position:relative;height:62vh;align-self:center}
+.w{position:absolute;left:0;bottom:44px;opacity:0;transform:translateY(26px);transition:opacity .7s var(--ease),transform .7s var(--ease);pointer-events:none}
+.w.on{opacity:1;transform:none}
+.w h2{font:400 clamp(64px,10.5vw,170px)/.95 var(--serif);letter-spacing:-.02em}
+.w p{max-width:32ch;margin-top:18px;color:#cfc8b4}
+.rail{position:absolute;left:0;bottom:0;display:flex;gap:18px;font-size:14px;font-weight:500}
+.rail span{opacity:.4;padding-bottom:4px;border-bottom:2px solid transparent;transition:all .4s}
+.rail span.on{opacity:1;border-color:var(--thread)}
+.frame{position:relative;height:min(76svh,820px);aspect-ratio:5/6;justify-self:center;box-shadow:0 30px 80px rgba(0,0,0,.45);background:#0a0f26}
+.frame canvas,.frame img{position:absolute;inset:0;width:100%;height:100%}
+.frame img{object-fit:cover;clip-path:inset(0 0 100% 0)}
+@media(max-width:860px){
+  .stage{grid-template-columns:1fr;grid-template-rows:auto 1fr;align-content:center;gap:18px;padding-top:70px}
+  .words{height:244px}
+  .w{bottom:50px}
+  .w h2{font-size:clamp(54px,17vw,92px)}
+  .w p{margin-top:8px;font-size:15px}
+  .frame{height:min(50svh,520px)}
+}
+
+/* ============ MOTIF EXPLORER ============ */
+.explorer{background:var(--paper)}
+.sec-head{padding:clamp(80px,13vh,150px) var(--pad) 28px;display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap}
+.sec-head h2{font:400 clamp(46px,7.4vw,112px)/.98 var(--serif);letter-spacing:-.015em;max-width:11ch}
+.sec-head p{max-width:36ch;color:#4b4a46}
+.field{position:relative;height:84svh;min-height:520px;overflow:hidden;cursor:grab;touch-action:none;background:var(--cotton);border-block:1px solid rgba(13,19,48,.18);user-select:none;-webkit-user-select:none}
+.field.drag{cursor:grabbing}
+.plane{position:absolute;left:0;top:0;width:2000px;height:1300px;will-change:transform;
+  background:repeating-linear-gradient(90deg,rgba(31,47,92,.08) 0 1px,transparent 1px 14px)}
+.node{position:absolute;display:grid;gap:12px;justify-items:start;text-align:left;animation:drift 7s ease-in-out infinite alternate;animation-delay:var(--d,0s)}
+.node img{width:100%;height:auto;pointer-events:none;filter:drop-shadow(0 20px 26px rgba(13,19,48,.2));transition:transform .5s var(--ease)}
+.node:hover img,.node:focus-visible img{transform:scale(1.07) rotate(-1.5deg)}
+.node b{font:400 28px/1 var(--serif)}
+.node small{display:block;font-size:14px;color:#55534d;margin-top:2px}
+@keyframes drift{to{transform:translateY(-14px)}}
+.hint{position:absolute;left:var(--pad);bottom:22px;background:var(--ink);color:var(--cotton);border-radius:99px;padding:8px 16px;font-size:14px;font-weight:500;pointer-events:none}
+@media(max-width:760px){
+  .field{height:auto;min-height:0;cursor:default;touch-action:auto;overflow:visible}
+  .plane{position:static;width:auto;height:auto;transform:none!important;display:grid;grid-template-columns:1fr 1fr;gap:34px 18px;padding:30px var(--pad);background:none}
+  .node{position:static;width:auto!important;animation:none}
+  .node b{font-size:23px}
+  .hint{display:none}
+}
+
+/* ============ PANELS (drawer / modal / bag) ============ */
+.scrim{position:fixed;inset:0;background:rgba(13,19,48,.58);opacity:0;pointer-events:none;transition:opacity .35s;z-index:70}
+.scrim.on{opacity:1;pointer-events:auto}
+.panel{position:fixed;z-index:80;background:var(--paper);visibility:hidden;transition:transform .5s var(--ease),opacity .4s,visibility 0s .5s}
+.panel.on{visibility:visible;transition-delay:0s}
+.drawer{top:0;right:0;bottom:0;width:min(540px,100%);transform:translateX(102%);overflow:auto;padding:calc(28px + env(safe-area-inset-top,0px)) 28px calc(28px + env(safe-area-inset-bottom,0px))}
+.drawer.on{transform:none}
+.modal{left:50%;top:50%;width:min(1040px,94vw);max-height:90svh;overflow:auto;transform:translate(-50%,-47%) scale(.97);opacity:0;display:grid;grid-template-columns:1fr 1fr}
+.modal.on{transform:translate(-50%,-50%);opacity:1}
+.close{position:absolute;top:14px;right:14px;z-index:3;width:42px;height:42px;border-radius:50%;background:var(--ink);color:var(--cotton);font-size:22px;line-height:1}
+.drawer h3{font:400 clamp(48px,9vw,76px)/1 var(--serif);margin-top:18px}
+.gloss{color:#55534d;margin-top:4px;font-size:18px}
+.pieces{position:relative;margin:26px 0 12px;background:var(--cotton);border-radius:4px;overflow:visible}
+.tile{position:absolute;background-image:var(--img);background-repeat:no-repeat;transition:transform 1s var(--ease),opacity 1s var(--ease)}
+.pieces.off .tile{transform:translate(var(--tx),var(--ty)) rotate(var(--r)) scale(.62);opacity:.9}
+.btn{display:inline-flex;align-items:center;justify-content:center;background:var(--ink);color:var(--cotton);border-radius:99px;padding:12px 24px;font-weight:600;transition:background .2s}
+.btn:hover{background:var(--indigo)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:none;color:var(--ink);border:1px solid var(--ink)}
+.cap{margin:14px 0 22px;color:#4b4a46;min-height:3.2em}
+.note{border:1.5px dashed rgba(13,19,48,.35);border-radius:4px;padding:16px 18px;font-size:15px;color:#4b4a46;margin:8px 0 26px}
+.note b{display:block;color:var(--char);margin-bottom:2px}
+.drawer h4{font:400 24px var(--serif);margin-bottom:12px}
+.mini{display:flex;gap:14px;flex-wrap:wrap}
+.mini button{width:104px;text-align:left;font-size:14px;font-weight:500;line-height:1.3}
+.mini img{width:104px;height:122px;object-fit:cover;margin-bottom:6px;transition:transform .4s var(--ease)}
+.mini button:hover img{transform:translateY(-4px)}
+
+/* ============ CRAFT ============ */
+.craft{background:var(--moss);color:var(--cotton);padding:clamp(80px,13vh,150px) var(--pad);display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:clamp(30px,6vw,96px);align-items:start}
+.lens{position:relative;cursor:crosshair;touch-action:pan-y;overflow:hidden;border-radius:2px}
+.lens img{width:100%;height:auto}
+.loupe{position:absolute;width:200px;height:200px;border-radius:50%;border:2px solid var(--cotton);box-shadow:0 14px 44px rgba(0,0,0,.4);pointer-events:none;opacity:0;transform:scale(.8);transition:opacity .2s,transform .3s var(--ease);background-repeat:no-repeat;background-color:#000}
+.lens.on .loupe{opacity:1;transform:none}
+.lens-cap{margin-top:12px;font-size:14px;color:#c8c3ae}
+.craft h2{font:400 clamp(46px,6.6vw,100px)/.98 var(--serif);letter-spacing:-.015em}
+.craft-copy>p{max-width:50ch;margin-top:22px;font-size:19px;color:#e0dac8}
+.atloom{margin-top:44px}
+.atloom h3{font:400 30px var(--serif);margin-bottom:16px}
+.strip{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px}
+.strip figure{display:grid;gap:8px;align-content:start}
+.strip img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:2px}
+.strip figcaption{font-size:13px;line-height:1.35;color:#c8c3ae}
+.atloom dl{display:grid;grid-template-columns:auto 1fr;gap:12px 26px}
+.atloom dt{color:#c8c3ae}
+.atloom dd{font-weight:500}
+.atloom>p{margin-top:18px;font-size:14px;color:#c8c3ae}
+@media(max-width:560px){.strip{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;margin-inline:calc(-1*var(--pad));padding-inline:var(--pad);scrollbar-width:none}.strip::-webkit-scrollbar{display:none}.strip figure{flex:0 0 74%;scroll-snap-align:center}}
+@media(max-width:860px){.craft{grid-template-columns:1fr}}
+
+/* ============ SHOP ============ */
+.shop{background:var(--paper);overflow-x:clip}
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(36px,5vw,72px) clamp(20px,3vw,48px);padding:20px var(--pad) clamp(100px,20vh,220px);align-items:start}
+.card{display:block;text-align:left;will-change:transform}
+.card:nth-child(3n+2){margin-top:14vh}
+.card:nth-child(3n){margin-top:5vh}
+.card .ph{position:relative;overflow:hidden;background:var(--cotton);aspect-ratio:4/5}
+.card.wide .ph{aspect-ratio:4/3}
+.card img{width:100%;height:100%;object-fit:cover;transition:transform .9s var(--ease)}
+.card:hover img,.card:focus-visible img{transform:scale(1.06)}
+.card .look{position:absolute;left:12px;bottom:12px;background:var(--ink);color:var(--cotton);border-radius:99px;padding:6px 14px;font-size:14px;font-weight:500;opacity:0;transform:translateY(8px);transition:all .4s var(--ease)}
+.card:hover .look,.card:focus-visible .look{opacity:1;transform:none}
+.meta{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-top:14px}
+.meta b{font:400 clamp(22px,2.2vw,30px)/1.1 var(--serif)}
+.meta span{font-weight:600;white-space:nowrap}
+.card small{display:block;color:#55534d;font-size:14px}
+.shop>.fine{padding:0 var(--pad) 40px;font-size:14px;color:#55534d;margin-top:-60px}
+@media(max-width:860px){
+  .gallery{grid-template-columns:1fr 1fr;gap:44px 18px}
+  .card:nth-child(n){margin-top:0;transform:none!important}
+  .shop>.fine{margin-top:0}
+  .card .look{opacity:1;transform:none}
+  .modal{grid-template-columns:1fr}
+}
+@media(max-width:560px){.gallery{grid-template-columns:1fr}}
+.pbody{padding:clamp(24px,4vw,48px);display:flex;flex-direction:column;gap:14px;justify-content:center}
+.pbody h3{font:400 clamp(36px,4.4vw,58px)/1 var(--serif)}
+.pbody .price{font-size:24px;font-weight:600}
+.sizes,.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid rgba(13,19,48,.4);border-radius:99px;padding:8px 16px;font-size:15px;font-weight:500;display:inline-flex;gap:8px;align-items:center;transition:background .2s,color .2s}
+.chip:hover{border-color:var(--ink)}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--cotton);border-color:var(--ink)}
+.dot{width:13px;height:13px;border-radius:50%;border:1px solid rgba(128,128,128,.6)}
+.pbody .fine{padding:0;margin:0}
+.drawer .fine{padding:0}
+
+/* ============ BUILD ============ */
+.build{background:var(--ink);color:var(--cotton);padding-bottom:clamp(80px,14vh,160px)}
+.build .sec-head p{color:#cfc8b4}
+.builder{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:clamp(28px,5vw,80px);padding:20px var(--pad) 0;align-items:start}
+.preview{position:sticky;top:90px}
+.preview canvas{width:100%;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.ctrls{display:grid;gap:30px}
+.ctrls fieldset{border:0;padding:0}
+.ctrls legend{font:400 24px var(--serif);margin-bottom:12px;padding:0}
+.ctrls .chip{border-color:rgba(236,230,216,.4)}
+.ctrls .chip:hover{border-color:var(--cotton)}
+.ctrls .chip[aria-pressed=true]{background:var(--cotton);color:var(--ink);border-color:var(--cotton)}
+.summary{border-top:1px solid rgba(236,230,216,.3);padding-top:22px;display:grid;gap:12px}
+.summary strong{font:400 34px/1.1 var(--serif)}
+.summary p{color:#cfc8b4}
+.summary .btn{background:var(--cotton);color:var(--ink);width:max-content}
+.summary .btn:hover{background:#fff}
+@media(max-width:860px){.builder{grid-template-columns:1fr}.preview{position:sticky;top:58px;z-index:4;background:var(--ink);padding:8px 0 12px}.preview canvas{box-shadow:0 10px 24px rgba(0,0,0,.4);max-height:30svh;object-fit:contain}}
+
+/* ============ BAG + TOAST + FOOTER ============ */
+.bag-list{list-style:none;padding:0;margin:26px 0;display:grid;gap:18px}
+.bag-list li{display:grid;grid-template-columns:1fr auto;gap:4px 14px;padding-bottom:18px;border-bottom:1px solid rgba(13,19,48,.18)}
+.bag-list small{color:#55534d;grid-column:1}
+.bag-list .rm{grid-column:2;grid-row:1/3;align-self:center;font-size:14px;text-decoration:underline;text-underline-offset:3px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,30px);background:var(--ink);color:var(--cotton);padding:12px 22px;border-radius:99px;font-weight:500;font-size:15px;opacity:0;pointer-events:none;transition:all .45s var(--ease);z-index:100;max-width:92vw;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .node{animation:none}
+  .hero-copy>*{transition:none}
+  .tile,.panel{transition-duration:.01s}
+}
+</style>
+<style>.menu:not(.on){visibility:hidden;pointer-events:none}.menu{position:fixed;inset:0}</style>
+<link rel="stylesheet" href="css/nav.css">
+</head>
+<body data-page="home" data-has-sound>
+
+</nav>
+
+<main>
+<!-- ===== HERO: threads weave the page ===== -->
+<section class="hero" id="top" aria-label="Introduction">
+  <canvas id="loom" aria-hidden="true"></canvas>
+  <div class="hero-copy">
+    <h1>From thread<br>to story.</h1>
+    <p>Akwete cloth is woven by hand in Abia State, Nigeria. Move across the loom and the threads move with you.</p>
+    <a class="cta" href="#shop">Wear the story</a>
+  </div>
+</section>
+
+<!-- ===== SCROLL = WEAVING ===== -->
+<section class="weave" id="weave" aria-label="A cloth being woven as you scroll">
+  <div class="stage">
+    <div class="words" aria-live="polite">
+      <div class="w on"><h2>Thread</h2><p>Every cloth starts as lines of cotton, pulled tight on the loom.</p></div>
+      <div class="w"><h2>Pattern</h2><p>The weft passes between the warp. Shapes appear row by row.</p></div>
+      <div class="w"><h2>Memory</h2><p>Motifs carry names, and names carry stories. We are gathering them with the weavers.</p></div>
+      <div class="w"><h2>Identity</h2><p>Worn in public, a cloth speaks before you do.</p></div>
+      <div class="w"><h2>Akwete</h2><p>Handwoven in Abia State, Nigeria.</p></div>
+      <div class="rail" aria-hidden="true"><span class="on">Thread</span><span>Pattern</span><span>Memory</span><span>Identity</span><span>Akwete</span></div>
+    </div>
+    <div class="frame">
+      <canvas id="weaveCanvas" aria-hidden="true"></canvas>
+      <img id="weavePhoto" data-img="fold" alt="A handwoven Akwete cloth in green, rust, cream and navy, draped against a plaster wall">
+    </div>
+  </div>
+</section>
+
+<!-- ===== MOTIF EXPLORER ===== -->
+<section class="explorer" id="motifs">
+  <div class="sec-head">
+    <h2>Pick a motif.</h2>
+    <p>Select a shape to read it, then unweave it to see how it is built. On a computer, drag the cloth to look around.</p>
+  </div>
+  <div class="field" id="field">
+    <div class="plane" id="plane">
+      <button class="node" data-motif="ikaki" style="left:520px;top:330px;width:420px;--d:-1s"><img data-img="ikaki" alt=""><span><b>Ikaki</b><small>Tortoise</small></span></button>
+      <button class="node" data-motif="ebe" style="left:1030px;top:300px;width:460px;--d:-3s"><img data-img="ebe" alt=""><span><b>Ebe</b><small>Patterned gourd</small></span></button>
+      <button class="node" data-motif="akpukpa" style="left:640px;top:690px;width:460px;--d:-5s"><img data-img="akpukpa" alt=""><span><b>Akpukpa</b><small>Geometric</small></span></button>
+      <button class="node" data-motif="nki" style="left:1180px;top:650px;width:440px;--d:-2s"><img data-img="nki" alt=""><span><b>Nki</b><small>Comb, teeth</small></span></button>
+    </div>
+    <div class="hint">Drag to explore</div>
+  </div>
+</section>
+
+<!-- ===== CRAFT + MACRO LENS ===== -->
+<section class="craft" id="craft">
+  <div>
+    <div class="lens" id="craftLens"><img data-img="fold" alt="Close view of a handwoven Akwete cloth"><div class="loupe"></div></div>
+    <p class="lens-cap">Hold your cursor or finger on the cloth to see the thread.</p>
+    <p class="lens-cap"><a href="history.html" style="font-weight:600">Read the history of Akwete, and who wears it</a></p>
+  </div>
+  <div class="craft-copy">
+    <h2>More than a surface.</h2>
+    <p>Akwete is woven by hand. Extra weft threads are laid in by the weaver to raise the pattern from the ground cloth, so every shape is made, not printed. Look closely and you will see where one hand stopped and the next row began.</p>
+    <aside class="atloom" aria-label="At the loom">
+      <h3>At the loom</h3>
+      <div class="strip">
+        <figure><img src="assets/weavers/blue-warp.jpg" alt="A weaver picking out a pink, red and white pattern by hand against a deep blue warp" loading="lazy"><figcaption>Picking out the pattern by hand, row by row, against a deep blue warp.</figcaption></figure>
+        <figure><img src="assets/weavers/diamonds.jpg" alt="A weaver reaching across an upright loom, with diamond and comb-like motifs appearing below" loading="lazy"><figcaption>Reaching across the warp as diamond motifs appear below.</figcaption></figure>
+        <figure><img src="assets/weavers/striped.jpg" alt="A weaver seated at an upright loom weaving a striped and checked cloth" loading="lazy"><figcaption>Seated at an upright loom, weaving stripes and checks.</figcaption></figure>
+      </div>
+      <dl>
+        <dt>The loom</dt><dd>A tall upright loom. The Akwete loom is described as the widest in Nigeria, making cloth about 40 to 50 inches wide.</dd>
+        <dt>The pattern</dt><dd>Shapes are woven in with extra weft threads over a plain ground cloth, not printed afterwards.</dd>
+        <dt>The time</dt><dd>One cloth can take up to three days, depending on its size and how complex the pattern is.</dd>
+        <dt>In pairs</dt><dd>Most cloths are woven as a matching pair, worn together: one as the wrapper, the other as a stole, blouse or folded over the top.</dd>
+      </dl>
+      <p>Weavers at work on upright looms.</p>
+    </aside>
+  </div>
+</section>
+
+<!-- ===== SHOP ===== -->
+<section class="shop" id="shop">
+  <div class="sec-head">
+    <h2>Objects for living with.</h2>
+    <p>Wrappers to wear, and pieces for the home.</p>
+  </div>
+  <div class="gallery" id="gallery"></div>
+  <p class="fine">Colours may look slightly different from the photographs. After you order, we contact you to confirm details, production time and payment.</p>
+</section>
+
+<!-- ===== BUILD YOUR AKWETE ===== -->
+<section class="build" id="build">
+  <div class="sec-head">
+    <h2>Build your Akwete.</h2>
+    <p>Choose a cloth, two motifs and how they alternate. The preview weaves itself again with every change.</p>
+  </div>
+  <div class="builder">
+    <div class="preview"><canvas id="buildCanvas" aria-label="Live preview of your custom cloth"></canvas></div>
+    <div class="ctrls">
+      <fieldset><legend>Piece</legend><div class="chips" data-group="piece"></div></fieldset>
+      <fieldset><legend>Cloth colour</legend><div class="chips" data-group="base"></div></fieldset>
+      <fieldset><legend>First motif</legend><div class="chips" data-group="a"></div></fieldset>
+      <fieldset><legend>Second motif</legend><div class="chips" data-group="b"></div></fieldset>
+      <fieldset><legend>Arrangement</legend><div class="chips" data-group="arr"></div></fieldset>
+      <div class="summary">
+        <strong id="sumTitle"></strong>
+        <p id="sumText"></p>
+        <p id="sumPrice"></p>
+        <button class="btn" id="reqBtn">Add this piece to my bag</button>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ===== PANELS ===== -->
+<div class="scrim" id="scrim"></div>
+
+<aside class="panel drawer" id="motifPanel" role="dialog" aria-modal="true" aria-labelledby="mName">
+  <button class="close" data-close aria-label="Close">&times;</button>
+  <h3 id="mName"></h3>
+  <p class="gloss" id="mGloss"></p>
+  <div class="pieces" id="pieces"></div>
+  <button class="btn" id="unweaveBtn">Unweave</button>
+  <p class="cap" id="mCap"></p>
+  <div class="note"><b>Meaning and attribution</b><span id="mMeaning"></span> <a href="history.html#motifs-record">More on the history page</a></div>
+  <h4>Pieces in similar colours</h4>
+  <div class="mini" id="mMini"></div>
+</aside>
+
+<section class="panel modal" id="prodPanel" role="dialog" aria-modal="true" aria-labelledby="pName">
+  <button class="close" data-close aria-label="Close">&times;</button>
+  <div class="lens" id="prodLens"><img id="pImg" alt=""><div class="loupe"></div></div>
+  <div class="pbody">
+    <small id="pKind"></small>
+    <h3 id="pName"></h3>
+    <div class="price" id="pPrice"></div>
+    <div class="sizes" id="pSizes" role="group" aria-label="Size"></div>
+    <button class="btn" id="pAdd">Add to bag</button>
+    <p class="fine">Hold on the image to look closer.</p>
+  </div>
+</section>
+
+<aside class="panel drawer" id="bagPanel" role="dialog" aria-modal="true" aria-labelledby="bagTitle">
+  <button class="close" data-close aria-label="Close">&times;</button>
+  <h3 id="bagTitle">Your bag</h3>
+  <ul class="bag-list" id="bagList"></ul>
+  <p id="bagTotal" style="font-weight:600;font-size:20px"></p>
+  <p class="fine" style="margin:12px 0 22px">You will sign in with Google at checkout so the order can be saved.</p>
+  <button class="btn" id="checkoutBtn">Go to checkout</button>
+</aside>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="js/config.js"></script>
+<script src="assets/images.js"></script>
+<script src="js/lang/ig.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/shared.js"></script>
+<script src="js/nav.js"></script>
+<script>
+window.addEventListener('DOMContentLoaded',()=>{
+'use strict';
+/* ============ HELPERS ============ */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+/* If a support file did not load (for example a partial upload), keep the rest of the page working. */
+const IMG=window.IMG||{};
+const AK=window.AK||{configured:false,user:null,getBag:()=>[],count:()=>0,total:()=>0,addItem(){},removeAt(){},naira:n=>'\u20A6'+Number(n).toLocaleString('en-NG')};
+const missing=[];
+if(!window.IMG)missing.push('assets/images.js');
+if(!window.AK)missing.push('js/shared.js');
+if(!document.querySelector('.hd'))missing.push('js/nav.js');
+if(!document.querySelector('link[href$="css/nav.css"]')||getComputedStyle(document.body).getPropertyValue('--pad')==='')missing.push('css/nav.css');
+if(missing.length){
+  console.error('Akwete: these files did not load:',missing.join(', '));
+  document.body.insertAdjacentHTML('afterbegin','<div role="alert" style="position:relative;z-index:300;background:#b4532f;color:#fff;padding:12px 16px;font:500 15px/1.4 system-ui,sans-serif">Part of this page did not load correctly. Please refresh. (Site owner: missing '+missing.join(', ')+'. See check.html.)</div>');
+}
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const naira=n=>'₦'+n.toLocaleString('en-NG');
+const hex=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16));
+function hash(i,j){let h=Math.imul(i,374761393)^Math.imul(j,668265263);h=Math.imul(h^(h>>>13),1274126177);return((h^(h>>>16))>>>0)/4294967295}
+const dprOf=()=>Math.min(window.devicePixelRatio||1,2);
+$$('[data-img]').forEach(el=>{if(IMG[el.dataset.img])el.src=IMG[el.dataset.img]});
+
+/* ============ THE WEAVE ENGINE ============
+   Every "cell" is one crossing of warp and weft. paintCell draws it with a
+   highlight on top, shadow below and a seam on the left, so flat colour reads as thread. */
+function paintCell(ctx,x,y,s,rgb,i,j){
+  const n=(hash(i,j)-.5)*18, e=s+.6, t=Math.max(1,s*.16);
+  ctx.fillStyle=`rgb(${rgb[0]+n|0},${rgb[1]+n|0},${rgb[2]+n|0})`;ctx.fillRect(x,y,e,e);
+  ctx.fillStyle='rgba(255,255,255,.12)';ctx.fillRect(x,y,e,t);
+  ctx.fillStyle='rgba(0,0,0,.2)';ctx.fillRect(x,y+s-t,e,t+.6);
+  ctx.fillStyle='rgba(0,0,0,.08)';ctx.fillRect(x,y,Math.max(1,s*.07),e);
+}
+/* Motif patterns. Each returns a palette slot: 0 field, 1 light, 2 accent, 3 deep.
+   All repeat every 12 or 24 rows so they can be stacked in bands. */
+const P={
+  ikaki(x,y){const u=12,lx=x%u,ly=y%u,chk=((x/u|0)+(y/u|0))&1,t=(lx>ly)^chk;
+    if(Math.abs(lx-5.5)+Math.abs(ly-5.5)<2.6)return 2; if(lx===0||ly===0)return 3; return t?1:0},
+  ebe(x,y){const d=Math.floor((Math.abs(x%24-11.5)+Math.abs(y%24-11.5))/2);return[2,1,0,1,3,1][d%6]},
+  akpukpa(x,y){const v=x+Math.abs((y%24)-12);return[0,1,0,2][Math.floor(v/3)%4]},
+  nki(x,y){const r=y%24;if(r<8||r>=16)return(x%4<2)?3:1;const ly=r-8,peak=Math.abs(x%12-6)*1.3;return ly>peak?2:0}
+};
+function clothIdx(x,y,A,B,arr){
+  const band=Math.floor(y/24);
+  const useB=arr==='ABAB'?band%2===1:arr==='AABB'?Math.floor(band/2)%2===1:false;
+  if(y%24===23)return 3;
+  return P[useB?B:A](x,y);
+}
+function warpLines(ctx,W,H,cell,cols,alpha,mx,my){
+  ctx.strokeStyle=`rgba(236,230,216,${alpha})`;ctx.lineWidth=1;
+  for(let c=0;c<cols;c++){
+    const x0=c*cell+cell/2;ctx.beginPath();
+    for(let y=0;y<=H;y+=H/14){
+      let dx=0;if(mx>-900){const ddx=x0-mx,ddy=y-my,d=Math.hypot(ddx,ddy);dx=ddx/(d+1)*Math.exp(-(d*d)/(150*150))*34}
+      y===0?ctx.moveTo(x0+dx,y):ctx.lineTo(x0+dx,y);
+    }ctx.stroke();
+  }
+}
+
+/* ============ SOUND (optional, off by default) ============ */
+const snd={ctx:null,on:false,t:null,n:0,master:null};
+function noise(dur,freq,q,vol){try{
+  const c=snd.ctx,len=c.sampleRate*dur|0,buf=c.createBuffer(1,len,c.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3);
+  const s=c.createBufferSource();s.buffer=buf;const f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=freq;f.Q.value=q;
+  const g=c.createGain();g.gain.value=vol;s.connect(f);f.connect(g);g.connect(snd.master);s.start();}catch(e){}}
+function thunk(){try{const c=snd.ctx,o=c.createOscillator(),g=c.createGain();
+  o.frequency.setValueAtTime(110,c.currentTime);o.frequency.exponentialRampToValueAtTime(52,c.currentTime+.13);
+  g.gain.setValueAtTime(.16,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.15);
+  o.connect(g);g.connect(snd.master);o.start();o.stop(c.currentTime+.16);}catch(e){}}
+function beat(){snd.n++;const k=snd.n%4;if(k===1)noise(.07,1800,2,.55);else if(k===3)noise(.07,1050,2,.45);else if(k===0)thunk()}
+const tick=()=>{if(snd.on)noise(.03,3400,3,.3)};
+const paintSound=()=>$$('[data-sound]').forEach(b=>{b.setAttribute('aria-pressed',snd.on);b.textContent=snd.on?'Sound on':'Sound off'});
+$$('[data-sound]').forEach(b=>b.addEventListener('click',()=>{
+  if(!snd.ctx){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return toast('Audio is not supported in this browser.');
+    snd.ctx=new AC();snd.master=snd.ctx.createGain();snd.master.gain.value=.35;snd.master.connect(snd.ctx.destination)}
+  snd.on=!snd.on;paintSound();
+  if(snd.on){snd.ctx.resume();snd.t=setInterval(beat,430)}else{clearInterval(snd.t);}
+}));
+
+/* ============ TOAST ============ */
+let toastT;window.__toast=function(m){toast(m)};function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),3200)}
+
+/* ============ 1. HERO: threads construct the page ============ */
+(function hero(){
+  const sec=$('#top'),cv=$('#loom'),ctx=cv.getContext('2d');
+  const pal=['#16224a','#d9d1bd','#b4532f','#0b1126'].map(hex);
+  let W,H,cell,cols,rows,total,cloth,cx,pos=0,painted=0,vis=true,running=false;
+  const m={x:-999,y:-999,sx:-999,sy:-999};
+  function paintTo(n){
+    for(;painted<n;painted++){
+      const r=Math.floor(painted/cols);let c=painted%cols;if(r%2)c=cols-1-c;
+      paintCell(cx,c*cell,r*cell,cell,pal[P.ebe(c,r)],c,r);
+    }
+  }
+  function size(){
+    const d=dprOf();W=cv.clientWidth;H=cv.clientHeight;cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0);
+    cell=Math.max(11,Math.round(W/84));cols=Math.ceil(W/cell);rows=Math.ceil(H/cell);total=cols*rows;
+    cloth=document.createElement('canvas');cloth.width=W*d;cloth.height=H*d;cx=cloth.getContext('2d');cx.setTransform(d,0,0,d,0,0);
+    painted=0;if(RM)pos=total;paintTo(Math.floor(pos));
+  }
+  function frame(){
+    if(!vis){running=false;return}
+    if(painted<total){pos=Math.min(total,pos+total/340);paintTo(Math.floor(pos))}
+    m.sx+=(m.x-m.sx)*.14;m.sy+=(m.y-m.sy)*.14;
+    ctx.clearRect(0,0,W,H);ctx.fillStyle='#0d1330';ctx.fillRect(0,0,W,H);
+    ctx.drawImage(cloth,0,0,W,H);
+    warpLines(ctx,W,H,cell,cols,painted<total?.28:.16,m.sx,m.sy);
+    if(painted<total){ // the shuttle
+      const r=Math.floor(painted/cols);let c=painted%cols;if(r%2)c=cols-1-c;
+      ctx.fillStyle='#c8962e';ctx.fillRect(c*cell,r*cell-1,cell,cell+2);
+    }
+    if(!sec.classList.contains('ready')&&(pos>total*.3||RM))sec.classList.add('ready');
+    requestAnimationFrame(frame);
+  }
+  function start(){if(!running){running=true;requestAnimationFrame(frame)}}
+  size();start();setTimeout(()=>sec.classList.add('ready'),3200);
+  new IntersectionObserver(e=>{vis=e[0].isIntersecting;if(vis)start()}).observe(sec);
+  let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(size,150)});
+  sec.addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect();m.x=e.clientX-r.left;m.y=e.clientY-r.top;if(m.sx<-900){m.sx=m.x;m.sy=m.y}});
+  sec.addEventListener('pointerleave',()=>{m.x=m.y=-999});
+})();
+
+/* ============ 2. SCROLL = WEAVING ============ */
+const weave=(function(){
+  const sec=$('#weave'),cv=$('#weaveCanvas'),ctx=cv.getContext('2d'),photo=$('#weavePhoto');
+  const words=$$('.w',sec),rail=$$('.rail span',sec);
+  const COLS=40,ROWS=48,pal=['#1f3a2c','#e6dec8','#b4532f','#0f1d16'].map(hex);
+  let W,H,cell,lastKey=-1,lastStage=-1;
+  function size(){const d=dprOf();W=cv.clientWidth;H=cv.clientHeight;cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0);cell=W/COLS;lastKey=-1}
+  function update(){
+    const total=sec.offsetHeight-innerHeight,p=clamp(-sec.getBoundingClientRect().top/total,0,1);
+    const stage=Math.min(4,Math.floor(p*5));
+    if(stage!==lastStage){words.forEach((w,i)=>w.classList.toggle('on',i===stage));rail.forEach((r,i)=>r.classList.toggle('on',i===stage));lastStage=stage}
+    const wp=clamp(p/.8,0,1),done=Math.floor(wp*ROWS*COLS);
+    if(done!==lastKey){
+      lastKey=done;ctx.fillStyle='#0a0f26';ctx.fillRect(0,0,W,H);
+      for(let k=0;k<done;k++){const r=Math.floor(k/COLS);let c=k%COLS;if(r%2)c=COLS-1-c;
+        paintCell(ctx,c*cell,r*(H/ROWS),H/ROWS,pal[clothIdx(c,r,'akpukpa','ikaki','ABAB')],c,r)}
+      warpLines(ctx,W,H,cell,COLS,.14,-999,-999);
+    }
+    const k=clamp((p-.82)/.16,0,1);photo.style.clipPath=`inset(0 0 ${(1-k)*100}% 0)`;
+  }
+  size();addEventListener('resize',()=>{size();update()});
+  return{update};
+})();
+
+/* ============ 3. MOTIF EXPLORER ============ */
+const PRODUCTS={
+  'moss-cloth':{id:'moss-cloth',name:'The Moss Stripe Wrapper',kind:'Wrapper',price:85000,sizes:['One cloth']},
+  'cream-cloth':{id:'cream-cloth',name:'The Cream Diamond Wrapper',kind:'Wrapper',price:95000,sizes:['One cloth']},
+  'ember-cloth':{id:'ember-cloth',name:'The Ember Wrapper',kind:'Wrapper',price:110000,sizes:['One cloth']},
+  'plum-cloth':{id:'plum-cloth',name:'The Plum Border Wrapper',kind:'Wrapper',price:90000,sizes:['One cloth']},
+  wrap:{id:'wrap',name:'The Pattern Wrap',kind:'Textile wrap',price:68000,sizes:['1.8 × 1.2 m','2.2 × 1.5 m']},
+  runner:{id:'runner',name:'The Woven Runner',kind:'Table textile',price:45000,sizes:['1.5 × 0.4 m','2 × 0.4 m']},
+  cushion:{id:'cushion',name:'The Studio Cushion',kind:'Cushion cover',price:32000,sizes:['40 × 40 cm','50 × 50 cm']}
+};
+const MOTIFS={
+  ikaki:{name:'Ikaki',gloss:'Tortoise',meaning:'Traditionally tied to royalty and chieftaincy, to wisdom and cunning, and to peace. The tortoise is also the hero of many Igbo fables.',ratio:'487/276',look:'Triangles and diamonds lock together into a tortoise: shell, head and four feet.',pair:['wrap','cushion']},
+  ebe:{name:'Ebe',gloss:'Patterned gourd',meaning:'Described in published accounts as a talisman, protecting warriors going to battle and women during pregnancy.',ratio:'500/276',look:'Nested diamonds step outward in bands of red, gold and black.',pair:['cushion','wrap']},
+  akpukpa:{name:'Akpukpa',gloss:'Geometric',meaning:'One of the four main Akwete patterns named in popular summaries. Vibrant and geometric, worn to chieftaincy ceremonies and weddings, and the pattern buyers from outside the community most often choose.',ratio:'531/261',look:'Diagonal bars fold back on themselves into chevrons, in green and cream.',pair:['runner']},
+  nki:{name:'Nki',gloss:'Comb, teeth',meaning:'Akwete motifs are often named for what they look like, and comb is among the recorded names. A meaning for Nki is not yet recorded here.',ratio:'504/261',look:'Fine vertical stripes, like comb teeth, sit between rows of stepped triangles.',pair:['cushion','runner']}
+};
+const field=$('#field'),plane=$('#plane');
+let px=0,py=0,vx=0,vy=0,PW=2000,PH=1300;
+const dragOn=()=>!matchMedia('(max-width:760px)').matches;
+const bound=(v,f,P)=>f>=P?(f-P)/2:clamp(v,f-P,0);
+function applyPlane(){if(!dragOn()){plane.style.transform='';return}px=bound(px,field.clientWidth,PW);py=bound(py,field.clientHeight,PH);plane.style.transform=`translate3d(${px}px,${py}px,0)`}
+(function explorer(){
+  let down=false,moved=false,sx,sy,ox,oy,lx,ly,raf;
+  px=(field.clientWidth-PW)/2;py=(field.clientHeight-PH)/2;applyPlane();addEventListener('resize',applyPlane);
+  field.addEventListener('pointerdown',e=>{if(!dragOn())return;down=true;moved=false;sx=lx=e.clientX;sy=ly=e.clientY;ox=px;oy=py;vx=vy=0;cancelAnimationFrame(raf)});
+  field.addEventListener('pointermove',e=>{
+    if(!down)return;const dx=e.clientX-sx,dy=e.clientY-sy;
+    if(!moved&&Math.hypot(dx,dy)>5){moved=true;field.setPointerCapture(e.pointerId);field.classList.add('drag')}
+    if(moved){vx=e.clientX-lx;vy=e.clientY-ly;px=ox+dx;py=oy+dy;applyPlane()}lx=e.clientX;ly=e.clientY;
+  });
+  const up=()=>{if(!down)return;down=false;field.classList.remove('drag');
+    if(moved&&!RM){const glide=()=>{vx*=.94;vy*=.94;px+=vx;py+=vy;applyPlane();if(Math.hypot(vx,vy)>.4)raf=requestAnimationFrame(glide)};glide()}};
+  field.addEventListener('pointerup',up);field.addEventListener('pointercancel',up);
+  $$('.node').forEach(n=>{
+    n.addEventListener('click',()=>{if(!moved)openMotif(n.dataset.motif,n)});
+    n.addEventListener('pointerenter',tick);
+    n.addEventListener('focus',()=>{if(!dragOn())return;px=field.clientWidth/2-(n.offsetLeft+n.offsetWidth/2);py=field.clientHeight/2-(n.offsetTop+n.offsetHeight/2);plane.style.transition='transform .6s';applyPlane();setTimeout(()=>plane.style.transition='',650)});
+  });
+})();
+
+/* Unweave: slice the motif into tiles and let them drift apart, then pull them back */
+const unBtn=$('#unweaveBtn'),pieces=$('#pieces'),mCap=$('#mCap');
+const CAP_ON='Built from small runs of weft thread. Each piece here is a few rows of the weave.',CAP_OFF='The whole motif, as the weaver sees it.';
+function buildTiles(id){
+  const C=8,R=5,m=MOTIFS[id];pieces.innerHTML='';pieces.classList.remove('off');
+  pieces.style.aspectRatio=m.ratio;pieces.style.setProperty('--img',`url(${IMG[id]})`);
+  for(let r=0;r<R;r++)for(let c=0;c<C;c++){
+    const t=document.createElement('i');t.className='tile';
+    t.style.cssText=`left:${c*100/C}%;top:${r*100/R}%;width:calc(${100/C}% + .6px);height:calc(${100/R}% + .6px);background-size:${C*100}% ${R*100}%;background-position:${c/(C-1)*100}% ${r/(R-1)*100}%;transition-delay:${(Math.random()*.28).toFixed(2)}s`;
+    const spread=matchMedia('(max-width:560px)').matches?.35:1;
+    t.style.setProperty('--tx',((Math.random()*130-65)*spread).toFixed(0)+'px');
+    t.style.setProperty('--ty',((Math.random()*100-50)*spread).toFixed(0)+'px');
+    t.style.setProperty('--r',(Math.random()*50-25).toFixed(0)+'deg');
+    pieces.appendChild(t);
+  }
+  unBtn.textContent='Unweave';mCap.textContent=CAP_OFF;
+}
+unBtn.addEventListener('click',()=>{const off=pieces.classList.toggle('off');unBtn.textContent=off?'Reweave':'Unweave';mCap.textContent=off?CAP_ON:CAP_OFF;tick()});
+
+function openMotif(id,from){
+  const m=MOTIFS[id];$('#mName').textContent=m.name;$('#mGloss').textContent=m.gloss+'. '+m.look;
+  buildTiles(id);
+  $('#mMeaning').textContent=m.meaning||'A meaning for this motif is not yet recorded here.';
+  $('#mMini').innerHTML=m.pair.map(k=>`<button data-prod="${k}"><img src="${IMG[k]}" alt="">${PRODUCTS[k].name}</button>`).join('');
+  $$('#mMini button').forEach(b=>b.addEventListener('click',()=>openProduct(b.dataset.prod)));
+  openPanel($('#motifPanel'),from);
+}
+
+/* ============ 4. MACRO LENS (look at the thread) ============ */
+function makeLens(box,zoom=3){
+  const img=$('img',box),lp=$('.loupe',box);
+  const move=e=>{
+    const r=img.getBoundingClientRect(),x=clamp(e.clientX-r.left,0,r.width),y=clamp(e.clientY-r.top,0,r.height),h=lp.offsetWidth/2;
+    lp.style.left=(x-h)+'px';lp.style.top=(y-h)+'px';
+    lp.style.backgroundImage=`url(${img.src})`;lp.style.backgroundSize=`${r.width*zoom}px ${r.height*zoom}px`;
+    lp.style.backgroundPosition=`${h-x*zoom}px ${h-y*zoom}px`;
+  };
+  box.addEventListener('pointerenter',e=>{box.classList.add('on');move(e)});
+  box.addEventListener('pointermove',move);
+  box.addEventListener('pointerleave',()=>box.classList.remove('on'));
+  box.addEventListener('pointerdown',e=>{box.classList.add('on');move(e)});
+}
+makeLens($('#craftLens'),3.2);makeLens($('#prodLens'),3);
+
+/* ============ 5. SHOP, PRODUCT MODAL, BAG ============ */
+const gallery=$('#gallery');
+Object.values(PRODUCTS).forEach((p,i)=>{
+  const b=document.createElement('button');b.className='card'+(p.id.endsWith('-cloth')?' wide':'');b.dataset.speed=[.07,-.05,.11][i%3];
+  b.innerHTML=`<div class="ph"><img src="${IMG[p.id]}" alt="${p.name}"><span class="look">Look closer</span></div>
+  <div class="meta"><b>${p.name}</b><span>${naira(p.price)}</span></div><small>${p.kind}</small>`;
+  b.addEventListener('click',()=>openProduct(p.id,b));b.addEventListener('pointerenter',tick);gallery.appendChild(b);
+});
+let curProd=null,curSize=null;
+function openProduct(id,from){
+  curProd=PRODUCTS[id];curSize=curProd.sizes[0];
+  $('#pImg').src=IMG[id];$('#pImg').alt=curProd.name+', photograph';
+  $('#pKind').textContent=curProd.kind;$('#pName').textContent=curProd.name;$('#pPrice').textContent=naira(curProd.price);
+  const sz=$('#pSizes');sz.innerHTML=curProd.sizes.map((s,i)=>`<button class="chip" aria-pressed="${i===0}" data-s="${s}">${s}</button>`).join('');
+  $$('.chip',sz).forEach(c=>c.addEventListener('click',()=>{curSize=c.dataset.s;$$('.chip',sz).forEach(x=>x.setAttribute('aria-pressed',x===c));tick()}));
+  openPanel($('#prodPanel'),from);
+}
+$('#pAdd').addEventListener('click',()=>{addToBag({slug:curProd.id,name:curProd.name,detail:curSize,price:curProd.price});closePanels();toast('Added to your bag.')});
+function addToBag(item){AK.addItem(item)}
+function renderBag(){
+  const bag=AK.getBag();
+  const bn=$('#bagN');if(bn)bn.textContent=AK.count();
+  $('#bagList').innerHTML=bag.length?bag.map((b,i)=>`<li><b>${esc(b.name)}${b.qty>1?' × '+b.qty:''}</b><span>${naira(b.price*b.qty)}</span><small>${esc(b.detail)}</small><button class="rm" data-i="${i}">Remove</button></li>`).join(''):'<li><small>Your bag is empty. Add a piece from the shop.</small></li>';
+  $$('.rm').forEach(r=>r.addEventListener('click',()=>AK.removeAt(+r.dataset.i)));
+  $('#bagTotal').textContent=bag.length?'Total '+naira(AK.total()):'';
+  $('#checkoutBtn').disabled=!bag.length;
+}
+const bagBtn=$('#bagBtn');if(bagBtn)bagBtn.addEventListener('click',e=>openPanel($('#bagPanel'),e.currentTarget));
+$('#checkoutBtn').addEventListener('click',()=>{location.href='checkout.html'});
+addEventListener('bagchange',renderBag);
+renderBag();
+
+/* Floating gallery: cards drift at different speeds as you scroll */
+function parallax(){
+  if(!matchMedia('(min-width:861px)').matches||RM){$$('.card',gallery).forEach(c=>c.style.transform='');return}
+  const r=gallery.getBoundingClientRect(),d=innerHeight/2-(r.top+r.height/2);
+  $$('.card',gallery).forEach(c=>c.style.transform=`translate3d(0,${(d*c.dataset.speed).toFixed(1)}px,0)`);
+}
+
+/* ============ 6. BUILD YOUR AKWETE ============ */
+const PAL={
+  indigo:{label:'Indigo',c:['#1f2f5c','#e7e0cf','#b4532f','#0f1836']},
+  cotton:{label:'Cotton',c:['#e4dcc6','#f6f1e4','#b4532f','#1f2f5c']},
+  clay:{label:'Clay',c:['#a8482a','#e9dfc9','#1b1b1d','#6e2a14']},
+  moss:{label:'Moss',c:['#1f3a2c','#e6dec8','#c8962e','#12241b']}
+};
+const PIECE={wrap:{label:'Wrap',cols:72,rows:48,size:'1.8 × 1.2 m',base:68000},runner:{label:'Runner',cols:96,rows:48,size:'1.5 × 0.4 m',base:45000},cushion:{label:'Cushion',cols:48,rows:48,size:'40 × 40 cm',base:32000}};
+const ARR={ABAB:'alternating bands',AABB:'pairs of bands'};
+const S={piece:'wrap',base:'indigo',a:'ikaki',b:'ebe',arr:'ABAB'};
+const OPT={
+  piece:Object.entries(PIECE).map(([k,v])=>[k,v.label]),
+  base:Object.entries(PAL).map(([k,v])=>[k,v.label,v.c[0]]),
+  a:Object.keys(MOTIFS).map(k=>[k,MOTIFS[k].name]),
+  b:Object.keys(MOTIFS).map(k=>[k,MOTIFS[k].name]),
+  arr:Object.keys(ARR).map(k=>[k,k])
+};
+const bc=$('#buildCanvas'),bx=bc.getContext('2d');let anim=0;
+function drawBuild(k){
+  const pc=PIECE[S.piece],pal=PAL[S.base].c.map(hex),d=dprOf();
+  bc.style.aspectRatio=pc.cols+'/'+pc.rows;const W=bc.clientWidth,H=W*pc.rows/pc.cols;
+  bc.width=W*d;bc.height=H*d;bx.setTransform(d,0,0,d,0,0);bx.fillStyle='#0a0f26';bx.fillRect(0,0,W,H);
+  const cell=W/pc.cols,rowsShown=Math.floor(pc.rows*k);
+  for(let r=0;r<rowsShown;r++)for(let c=0;c<pc.cols;c++)paintCell(bx,c*cell,r*cell,cell,pal[clothIdx(c,r,S.a,S.b,S.arr)],c,r);
+}
+function playBuild(){cancelAnimationFrame(anim);if(RM){drawBuild(1);return}const t0=performance.now();
+  const step=now=>{const k=Math.min(1,(now-t0)/750);drawBuild(k);if(k<1)anim=requestAnimationFrame(step)};anim=requestAnimationFrame(step)}
+function summary(){
+  const pc=PIECE[S.piece],est=Math.round(pc.base*1.5/1000)*1000;
+  $('#sumTitle').textContent=`Your ${pc.label.toLowerCase()}, ${pc.size}`;
+  $('#sumText').textContent=`${PAL[S.base].label} cloth with ${MOTIFS[S.a].name} and ${MOTIFS[S.b].name} in ${ARR[S.arr]} (${S.arr}).`;
+  $('#sumPrice').textContent=`Estimate ${naira(est)}. Production time is confirmed after you order.`;
+  return est;
+}
+$$('[data-group]').forEach(g=>{
+  const key=g.dataset.group;
+  g.innerHTML=OPT[key].map(o=>`<button class="chip" data-v="${o[0]}" aria-pressed="${S[key]===o[0]}">${o[2]?`<i class="dot" style="background:${o[2]}"></i>`:''}${o[1]}</button>`).join('');
+  $$('.chip',g).forEach(c=>c.addEventListener('click',()=>{S[key]=c.dataset.v;$$('.chip',g).forEach(x=>x.setAttribute('aria-pressed',x===c));summary();playBuild();tick()}));
+});
+$('#reqBtn').addEventListener('click',()=>{const est=summary(),pc=PIECE[S.piece];
+  addToBag({custom:true,piece:S.piece,name:`Custom ${pc.label.toLowerCase()}`,detail:`${pc.size} · ${PAL[S.base].label} · ${MOTIFS[S.a].name} + ${MOTIFS[S.b].name} · ${S.arr}`,price:est});toast('Custom piece added to your bag.')});
+summary();
+let built=false;new IntersectionObserver(e=>{if(e[0].isIntersecting&&!built){built=true;playBuild()}},{threshold:.15}).observe(bc);
+addEventListener('resize',()=>{if(built)drawBuild(1)});
+
+/* ============ PANEL MANAGER (focus, Esc, scrim) ============ */
+let openEl=null,lastFocus=null;
+function openPanel(el,from){
+  if(openEl&&openEl!==el)openEl.classList.remove('on');
+  lastFocus=from||document.activeElement;openEl=el;el.classList.add('on');$('#scrim').classList.add('on');
+  document.body.style.overflow='hidden';setTimeout(()=>$('.close',el).focus(),60);
+}
+function closePanels(){
+  if(!openEl)return;openEl.classList.remove('on');openEl=null;$('#scrim').classList.remove('on');
+  document.body.style.overflow='';if(lastFocus&&lastFocus.focus)lastFocus.focus();
+}
+$('#scrim').addEventListener('click',closePanels);
+$$('[data-close]').forEach(b=>b.addEventListener('click',closePanels));
+addEventListener('keydown',e=>{
+  if(e.key==='Escape')closePanels();
+  if(e.key==='Tab'&&openEl){const f=$$('button,a[href]',openEl).filter(x=>x.offsetParent!==null);
+    if(!f.length)return;const a=f[0],z=f[f.length-1];
+    if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}}
+});
+
+/* ============ ONE SCROLL LOOP ============ */
+let tk=false;
+const onScroll=()=>{if(tk)return;tk=true;requestAnimationFrame(()=>{weave.update();parallax();tk=false})};
+addEventListener('scroll',onScroll,{passive:true});addEventListener('resize',onScroll);
+weave.update();parallax();
+});
+</script>
+
+</body>
+</html>

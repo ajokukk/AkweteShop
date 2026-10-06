@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Site check | Akwete</title>
+<style>
+  body{font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#f6f2e8;color:#1b1b1d;margin:0;padding:24px;max-width:760px;margin-inline:auto}
+  h1{font:400 34px Georgia,serif;margin:0 0 6px}
+  p{margin:6px 0 14px;color:#4b4a46}
+  .sum{padding:14px 16px;border-radius:6px;font-weight:600;margin:18px 0}
+  .sum.ok{background:#e3efe6;color:#1f3a2c}.sum.bad{background:#f6ded6;color:#8a2e12}
+  ul{list-style:none;padding:0;margin:0;display:grid;gap:4px}
+  li{display:flex;gap:10px;align-items:baseline;padding:6px 10px;background:#fff;border-radius:4px;font-size:15px;word-break:break-all}
+  li b{flex:none;width:1.4em}
+  li.ok b{color:#1f6b3a}li.bad{background:#fbe9e3}li.bad b{color:#b4321a}
+  li small{color:#77746b;margin-left:auto;flex:none}
+  h2{font-size:17px;margin:24px 0 8px}
+  code{background:#ece6d8;padding:1px 6px;border-radius:3px}
+  a{color:inherit}
+</style>
+</head>
+<body>
+<h1>Site check</h1>
+<p>This page tests that every file the website needs is uploaded to your host. Open it on your live address, for example <code>https://akweteshop.vercel.app/check.html</code>.</p>
+<div id="sum" class="sum" role="status">Checking...</div>
+<div id="out"></div>
+<p style="margin-top:28px"><a href="index.html">Back to the shop</a></p>
+
+<script>
+(function () {
+  'use strict';
+  var GROUPS = {
+    'Pages': ['index.html', 'history.html', 'checkout.html', 'orders.html'],
+    'Styles': ['css/nav.css', 'css/pages.css'],
+    'Scripts': ['js/nav.js', 'js/i18n.js', 'js/shared.js', 'js/config.js', 'js/lang/ig.js', 'assets/images.js'],
+    'Photos': ['assets/products/moss-cloth.jpg', 'assets/products/cream-cloth.jpg', 'assets/products/ember-cloth.jpg', 'assets/products/plum-cloth.jpg',
+      'assets/weavers/blue-warp.jpg', 'assets/weavers/diamonds.jpg', 'assets/weavers/striped.jpg',
+      'assets/people/may.jpg', 'assets/people/adichie.jpg', 'assets/people/otti.jpg', 'assets/people/soludo.jpg', 'assets/people/ajoku.jpg',
+      'assets/motifs/ikaki.png', 'assets/motifs/ebe.png', 'assets/motifs/akpukpa.jpg', 'assets/motifs/nki.jpg']
+  };
+  var out = document.getElementById('out'), sum = document.getElementById('sum');
+  var bad = 0, total = 0, notes = [];
+
+  function row(ul, ok, path, info) {
+    var li = document.createElement('li'); li.className = ok ? 'ok' : 'bad';
+    li.innerHTML = '<b>' + (ok ? '\u2713' : '\u2717') + '</b><span></span><small></small>';
+    li.children[1].textContent = path; li.children[2].textContent = info || '';
+    ul.appendChild(li);
+  }
+  function check(path, ul) {
+    total++;
+    return fetch(path + '?check=' + Date.now(), { cache: 'no-store' }).then(function (r) {
+      var ok = r.ok;
+      if (!ok) bad++;
+      row(ul, ok, path, ok ? '' : 'HTTP ' + r.status + ' (missing)');
+      return ok ? r.text().catch(function () { return ''; }) : '';
+    }).catch(function () { bad++; row(ul, false, path, 'could not load'); return ''; });
+  }
+
+  var keys = Object.keys(GROUPS), pagesText = {};
+  keys.reduce(function (chain, g) {
+    return chain.then(function () {
+      var h = document.createElement('h2'); h.textContent = g; out.appendChild(h);
+      var ul = document.createElement('ul'); out.appendChild(ul);
+      return GROUPS[g].reduce(function (c2, p) {
+        return c2.then(function () { return check(p, ul).then(function (t) { if (g === 'Pages' || p === 'js/config.js') pagesText[p] = t; }); });
+      }, Promise.resolve());
+    });
+  }, Promise.resolve()).then(function () {
+    var idx = pagesText['index.html'] || '';
+    if (idx) {
+      if (idx.indexOf('js/nav.js') < 0) notes.push('index.html is an OLD version (it does not use js/nav.js). Upload the latest index.html and clear your host\u2019s cache.');
+      if (idx.indexOf('menu.js') >= 0) notes.push('index.html still points at the removed js/menu.js. Upload the latest index.html.');
+    }
+    var cfg = pagesText['js/config.js'] || '';
+    if (/YOUR_PROJECT_REF|YOUR_SUPABASE_ANON_KEY/.test(cfg)) notes.push('js/config.js still has the placeholder Supabase values. Google sign-in, checkout and orders will not work until you paste your real Project URL and anon key.');
+    var h = document.createElement('h2'); h.textContent = 'Notes'; out.appendChild(h);
+    if (!notes.length) { var p = document.createElement('p'); p.textContent = 'No problems found in the settings above.'; out.appendChild(p); }
+    notes.forEach(function (n) { var p = document.createElement('p'); p.textContent = '\u2022 ' + n; out.appendChild(p); });
+    var good = bad === 0 && notes.length === 0;
+    sum.className = 'sum ' + (good ? 'ok' : 'bad');
+    sum.textContent = good ? 'All ' + total + ' files found. The site is fully uploaded.'
+      : (bad ? bad + ' of ' + total + ' files are missing. Re-upload them keeping the same folder names.' : 'All files found, but see the notes below.');
+  });
+})();
+</script>
+</body>
+</html>

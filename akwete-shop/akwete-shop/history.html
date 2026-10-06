@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The history of Akwete | Akwete</title>
+<meta name="description" content="A short history of Akwete cloth from Ndoki, Abia State, and some of the people seen wearing it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Gloock&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/pages.css">
+<style>
+html{scroll-behavior:smooth}
+
+/* hero */
+.hero{position:relative;background:var(--ink);color:var(--cotton);padding:clamp(130px,22vh,220px) var(--pad) clamp(60px,10vh,110px);overflow:hidden}
+.hero h1{font:400 clamp(52px,10vw,160px)/.95 var(--serif);letter-spacing:-.02em;max-width:13ch;margin:0 0 28px}
+.hero p{max-width:50ch;font-size:clamp(17px,1.6vw,21px);color:#d8d2c0}
+.band{height:46px;margin-top:clamp(50px,9vh,100px);
+  background:
+   repeating-linear-gradient(90deg,transparent 0 22px,rgba(13,19,48,.55) 22px 24px),
+   repeating-linear-gradient(0deg,rgba(255,255,255,.14) 0 2px,transparent 2px 11px),
+   linear-gradient(90deg,var(--clay) 0 14%,var(--cotton) 14% 22%,var(--indigo) 22% 44%,var(--cotton) 44% 50%,var(--moss) 50% 74%,var(--cotton) 74% 80%,var(--clay) 80% 100%);
+  mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+
+/* timeline */
+.sec{max-width:1180px;margin:0 auto;padding:clamp(70px,12vh,140px) var(--pad) 0}
+h2.big{font:400 clamp(40px,6vw,88px)/1 var(--serif);letter-spacing:-.015em;margin-bottom:12px;max-width:14ch}
+.lede{max-width:48ch;color:#4b4a46;margin-bottom:46px}
+.tl{position:relative;padding-left:clamp(28px,5vw,64px)}
+.tl::before,.tl .fill{content:"";position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:rgba(13,19,48,.18)}
+.tl .fill{background:var(--clay);transform-origin:top;transform:scaleY(var(--p,0));bottom:6px}
+.ev{position:relative;padding-bottom:clamp(40px,8vh,76px);max-width:640px;opacity:0;transform:translateY(22px);transition:opacity .8s,transform .8s cubic-bezier(.2,.8,.2,1)}
+.ev.in{opacity:1;transform:none}
+.ev::before{content:"";position:absolute;left:calc(-1*clamp(28px,5vw,64px) + 0px);top:8px;width:14px;height:14px;border-radius:50%;background:var(--paper);border:2px solid var(--clay)}
+.ev.in::before{background:var(--clay)}
+.ev.has{max-width:none;display:grid;grid-template-columns:minmax(0,600px) minmax(0,270px);gap:clamp(24px,4vw,56px);align-items:start}
+.ev-fig img{width:100%;height:auto;border-radius:2px;display:block}
+.ev-fig figcaption{font-size:14px;color:#55534d;margin-top:8px}
+@media(max-width:860px){.ev.has{display:block}.ev-fig{max-width:300px;margin-top:18px}}
+.ev .when{font-weight:600;color:var(--clay);font-size:15px}
+.ev h3{font:400 clamp(26px,3vw,38px)/1.1 var(--serif);margin:4px 0 10px}
+
+/* motifs on record */
+.mot{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
+.mc{background:var(--cotton);border-radius:4px;padding:22px;display:grid;gap:10px;align-content:start}
+.mc img{height:96px;width:auto;max-width:100%;object-fit:contain;justify-self:start;mix-blend-mode:multiply}
+.mc h3{font:400 28px var(--serif)}
+.mc small{color:#55534d;font-weight:500}
+
+/* people */
+.people{background:var(--ink);color:var(--cotton);margin-top:clamp(80px,14vh,160px);padding:clamp(70px,12vh,140px) var(--pad)}
+.people .in{max-width:1240px;margin:0 auto}
+.people h2.big{max-width:12ch}
+.people .lede{color:#cfc8b4}
+.wall{display:flex;flex-wrap:wrap;gap:clamp(28px,4vw,56px);align-items:flex-start;justify-content:space-between}
+.fig{width:var(--w);max-width:100%}
+.fig:nth-child(2n){margin-top:clamp(0px,5vw,64px)}
+.fig button{display:block;width:100%;padding:0;border:0;overflow:hidden;background:transparent;cursor:zoom-in;border-radius:2px}
+.fig img{width:100%;height:auto;transition:transform .9s cubic-bezier(.2,.8,.2,1),filter .5s;filter:saturate(.95)}
+.fig button:hover img,.fig button:focus-visible img{transform:scale(1.05);filter:none}
+.fig figcaption{padding-top:12px}
+.fig b{font:400 clamp(22px,2.2vw,30px)/1.15 var(--serif);display:block}
+.fig span{color:#cfc8b4;font-size:15px}
+.people .fine{color:#a9a38e;margin-top:46px;max-width:70ch}
+
+dialog{border:0;padding:0;background:transparent;max-width:min(92vw,900px);max-height:92vh;overflow:visible;color:var(--cotton)}
+dialog::backdrop{background:rgba(8,12,30,.88)}
+dialog img{max-width:100%;max-height:78vh;margin:0 auto;display:block}
+dialog p{text-align:center;margin-top:14px;font-size:17px}
+dialog .x{position:absolute;top:-46px;right:0;width:40px;height:40px;border-radius:50%;background:var(--cotton);color:var(--ink);font-size:22px;border:0;cursor:pointer}
+
+/* sources + footer */
+.src{max-width:1180px;margin:0 auto;padding:clamp(60px,10vh,110px) var(--pad) 120px}
+.src ul{list-style:none;padding:0;display:grid;gap:8px;margin-top:16px}
+.src a{text-underline-offset:3px}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.ev{opacity:1;transform:none;transition:none}.fig img{transition:none}}
+</style>
+<style>.menu:not(.on){visibility:hidden;pointer-events:none}.menu{position:fixed;inset:0}</style>
+<link rel="stylesheet" href="css/nav.css">
+</head>
+<body data-page="history">
+
+</nav>
+
+<main>
+<section class="hero">
+  <a class="back" href="index.html#shop">← Back to the shop</a>
+  <h1>A cloth with a long memory.</h1>
+  <p>Akwete is woven by Igbo women in Akwete, also called Ndoki, in Ukwa East, Abia State. It is one of the best known hand-woven textiles in West Africa, and its story is still being written by the women who make it.</p>
+  <div class="band" aria-hidden="true"></div>
+</section>
+
+<section class="sec" id="story">
+  <h2 class="big">How it came to be.</h2>
+  <p class="lede">Part of Akwete&rsquo;s story is written down and part is remembered, so dates and names differ between accounts.</p>
+  <div class="tl" id="tl">
+    <span class="fill" aria-hidden="true"></span>
+
+    <article class="ev has"><div class="txt">
+      <div class="when">Women, looms and families</div>
+      <h3>Woven in Ndoki, taught at home</h3>
+      <p>Akwete cloth is woven by women on tall vertical looms, while the men of the community traditionally build the looms. Skills pass from mothers and aunts to daughters. Girls often start at six or seven, and many weavers keep working into their eighties.</p>
+    </div>
+      <figure class="ev-fig"><img src="assets/weavers/blue-warp.jpg" alt="A weaver picking out a pattern by hand against a deep blue warp" loading="lazy"><figcaption>At the loom: pulling the pattern up through the warp by hand.</figcaption></figure>
+    </article>
+
+    <article class="ev">
+      <div class="when">Around the 1850s</div>
+      <h3>Dada Nwakata</h3>
+      <p>Oral tradition places the weaver Dada Nwakata in the 1850s. She is said to have received designs in dreams, worked in secret, and brought imported yarn and silk into her cloth. Many researchers think the craft is older than the nineteenth century and developed over a long time, since early European visitors already praised its quality.</p>
+    </article>
+
+    <article class="ev has"><div class="txt">
+      <div class="when">The nineteenth century</div>
+      <h3>Patrons, trade and a full-time craft</h3>
+      <p>Ijo communities such as the Ibani, Okrika and Kalabari traded for Akwete cloth and commissioned particular patterns and colours. As the palm oil trade declined, weaving grew from part-time work into a full-time occupation. Weavers moved to imported cotton, and later to machine-made yarn, which improved quality and widened the market.</p>
+    </div>
+      <figure class="ev-fig"><img src="assets/weavers/striped.jpg" alt="A weaver seated at an upright loom weaving a striped, checked cloth" loading="lazy"><figcaption>A weaver at work on a striped and checked cloth.</figcaption></figure>
+    </article>
+
+    <article class="ev">
+      <div class="when">1946</div>
+      <h3>The broadloom</h3>
+      <p>A larger loom arrived that cut weaving time and allowed wider cloth. It was expensive, so many weavers could not afford it.</p>
+    </article>
+
+    <article class="ev has"><div class="txt">
+      <div class="when">A tradition of ownership</div>
+      <h3>Every motif has a maker</h3>
+      <p>Weavers say they know more than a hundred motifs, yet rarely use more than three or four on one cloth. The creator of a new motif has traditionally held an unwritten copyright, and some motifs are described as gifts of inspiration or come from dreams. A women's weaving society later grew into a collective focused on quality and on protecting designs.</p>
+    </div>
+      <figure class="ev-fig"><img src="assets/weavers/diamonds.jpg" alt="A weaver reaching across an upright loom with diamond motifs appearing below" loading="lazy"><figcaption>Diamond and comb-like shapes appearing row by row.</figcaption></figure>
+    </article>
+
+    <article class="ev">
+      <div class="when">Today</div>
+      <h3>From heritage to wardrobe</h3>
+      <p>Designers now cut Akwete into dresses, kaftans, trousers, shoes and interiors. Ekwueme Federal University Ndufu has set up a weaving centre with a year-long course. In September 2026, at an Abia State event beside the 81st UN General Assembly, First Lady Priscillia Otti said &ldquo;Technology should serve Akwete.&rdquo; She spoke of a planned weaving and research centre and asked for standards and certification so that real Akwete can be told from imitations.</p>
+    </article>
+  </div>
+</section>
+
+<section class="sec" id="motifs-record">
+  <h2 class="big">Motifs on record.</h2>
+  <p class="lede">A few of the named patterns and what published accounts say about them. Meanings differ from source to source.</p>
+  <div class="mot">
+    <article class="mc"><img src="assets/motifs/ikaki.png" alt="Ikaki tortoise motif"><h3>Ikaki</h3><small>Tortoise</small>
+      <p>The most commonly woven motif. Traditionally linked to royalty and chieftaincy, to wisdom and cunning, and to peace. It is also tied to the tortoise as the hero of many Igbo fables. Accounts describe three kinds, including one that grew from the Ijebu prestige cloth Aso Olona.</p></article>
+    <article class="mc"><img src="assets/motifs/ebe.png" alt="Ebe motif"><h3>Ebe</h3><small>Patterned gourd</small>
+      <p>Described as a talisman, protecting warriors going to battle and women during pregnancy.</p></article>
+    <article class="mc"><img src="assets/motifs/akpukpa.jpg" alt="Akpukpa geometric motif"><h3>Akpukpa</h3><small>Geometric</small>
+      <p>One of the four main Akwete patterns named in popular summaries. It is vibrant, worn to chieftaincy ceremonies and weddings, and the one buyers from outside the community most often choose. Some writers also use the word for Akwete motifs in general.</p></article>
+    <article class="mc"><img src="assets/motifs/nki.jpg" alt="Nki comb motif"><h3>Nki</h3><small>Comb, teeth</small>
+      <p>Akwete motifs are often named for what they look like. Comb sits alongside recorded names such as children's fingers, earring, snake-back and stool. A meaning for Nki is not yet recorded here.</p></article>
+    <article class="mc"><h3>The four main patterns</h3><small>As popularly summarised</small>
+      <p>Etirieti is plainer, mostly stripes and squares. Akpukpa is vibrant. Ahia is complex and depends on the number of heddles. Ogbanaonweya is intricate and used mostly within the Akwete community.</p></article>
+    <article class="mc"><h3>Akwa Miri</h3><small>Cloth of the water</small>
+      <p>A widely traded cloth that means &ldquo;towel&rdquo;, woven white or white with indigo stripes. Other communities used it for waist ties, chair covers and bags.</p></article>
+    <article class="mc"><h3>Blangidi</h3><small>Also Plangidi</small>
+      <p>A solid-colour ground covered with repeating flowers, bags, birds or animals. The name comes from the English word &ldquo;blanket&rdquo;.</p></article>
+    <article class="mc"><h3>Nnadede</h3><small>A cloth with a legend</small>
+      <p>Said to commemorate a warrior's return in the 1860s, when his father gave him the cloth. It began as a status and ceremonial pattern before becoming widely used.</p></article>
+  </div>
+</section>
+
+<section class="people" id="worn">
+  <div class="in">
+    <h2 class="big">Seen in Akwete.</h2>
+    <p class="lede">Public figures and family moments where Akwete was worn. Select a photo to enlarge it.</p>
+    <div class="wall">
+      <figure class="fig" style="--w:min(100%,640px)"><button data-i="0"><img src="assets/people/may.jpg" alt="Theresa May in an Akwete-patterned jacket speaking with Muhammadu Buhari"></button>
+        <figcaption><b>Theresa May</b><span>In an Akwete jacket, in conversation with Muhammadu Buhari.</span></figcaption></figure>
+      <figure class="fig" style="--w:min(100%,430px)"><button data-i="1"><img src="assets/people/adichie.jpg" alt="Chimamanda Ngozi Adichie in yellow Akwete trousers"></button>
+        <figcaption><b>Chimamanda Ngozi Adichie</b><span>Posing in Akwete trousers.</span></figcaption></figure>
+      <figure class="fig" style="--w:min(100%,400px)"><button data-i="2"><img src="assets/people/otti.jpg" alt="Alex Otti and his wife with Remi Tinibu in the middle"></button>
+        <figcaption><b>Alex Otti and his wife</b><span>With Remi Tinibu in the middle.</span></figcaption></figure>
+      <figure class="fig" style="--w:min(100%,300px)"><button data-i="3"><img src="assets/people/soludo.jpg" alt="Prof. Chukwuma Soludo in a red Akwete top"></button>
+        <figcaption><b>Prof. Chukwuma Soludo</b><span>In a red Akwete top.</span></figcaption></figure>
+      <figure class="fig" style="--w:min(100%,460px)"><button data-i="4"><img src="assets/people/ajoku.jpg" alt="Mrs Treasuremaria Ajoku on the stairs, wrapped in Akwete cloth with a red gele and coral beads"></button>
+        <figcaption><b>Mrs Treasuremaria Ajoku</b><span>At her son's child dedication, wrapped in Akwete.</span></figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section class="src">
+  <h2 style="font:400 34px var(--serif)">Sources</h2>
+  <p class="fine" style="margin-top:6px">Facts above are paraphrased from these. Dates and meanings vary between accounts.</p>
+  <ul>
+    <li><a href="https://en.wikipedia.org/wiki/Akwete_cloth">Akwete cloth, Wikipedia</a> (summarising Chuku, Aronson, Eicher, Davis and others)</li>
+    <li><a href="https://en.wikipedia.org/wiki/Akwete">Akwete, Wikipedia</a></li>
+    <li><a href="https://www.channelstv.com/2026/09/29/unga-2026-abia-govt-seeks-global-recognition-for-akwete/">UNGA 2026: Abia Govt Seeks Global Recognition For Akwete, Channels Television, 29 September 2026</a></li>
+    <li><a href="https://thesun.ng/unga-2026-abia-govt-positions-akwete-textile-on-global-limelight-calls-for-its-recognition/">UNGA 2026: Abia govt positions Akwete textile on global limelight, The Sun</a></li>
+    <li><a href="https://medium.com/mbili-journal/the-intricate-history-of-akwete-fabric-in-nigeria-32d0da6ac76e">The intricate history of Akwete fabric in Nigeria, Mbili Journal</a></li>
+    <li><a href="https://www.fibre2fashion.com/industry-article/4994/origin-of-akwete-weaving">Origin of Akwete weaving, Fibre2Fashion</a></li>
+    <li><a href="https://fashionhistory.fitnyc.edu/akwete/">Akwete, Fashion History Timeline, FIT</a></li>
+    <li><a href="https://www.metmuseum.org/art/collection/search/318451">Wrapper by the Women's weaving cooperative in Akwete, The Metropolitan Museum of Art</a></li>
+    <li><a href="https://bellafricana.com/traditional-igbo-textile-akwete/">Traditional Igbo textile: Akwete, Bellafricana</a></li>
+    <li><a href="https://afktravel.com/85872/culture-corner-story-nigerian-akwete-cloth/">Culture Corner: The story of Nigerian Akwete cloth, AFKTravel</a></li>
+    <li><a href="https://craftatlas.co/crafts/akwete-cloth">Akwete cloth, Craft Atlas</a></li>
+    <li><a href="https://artsandculture.google.com/asset/akwete-cloth/1wG2ayY5Vy5cLg?hl=en">Akwete cloth, Google Arts &amp; Culture</a></li>
+  </ul>
+</section>
+</main>
+
+<dialog id="lb" aria-label="Enlarged photo">
+  <button class="x" aria-label="Close">&times;</button>
+  <img id="lbImg" alt=""><p id="lbCap"></p>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="js/config.js"></script>
+<script src="js/lang/ig.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/shared.js"></script>
+<script src="js/nav.js"></script>
+<script>
+(function(){
+  'use strict';
+  var $=function(s,r){return(r||document).querySelector(s)}, $$=function(s,r){return[].slice.call((r||document).querySelectorAll(s))};
+  /* reveal timeline events */
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.25});
+  $$('.ev').forEach(function(el){io.observe(el)});
+  /* thread fills as you read */
+  var tl=$('#tl');
+  function prog(){var r=tl.getBoundingClientRect(),p=(innerHeight*.6-r.top)/r.height;tl.style.setProperty('--p',Math.max(0,Math.min(1,p)))}
+  addEventListener('scroll',prog,{passive:true});addEventListener('resize',prog);prog();
+  /* lightbox */
+  var lb=$('#lb');
+  $$('.fig button').forEach(function(b){b.addEventListener('click',function(){
+    var f=b.closest('figure'),im=$('img',b);
+    $('#lbImg').src=im.src;$('#lbImg').alt=im.alt;
+    $('#lbCap').textContent=$('b',f).textContent+'. '+$('span',f).textContent;
+    lb.showModal();
+  })});
+  $('.x',lb).addEventListener('click',function(){lb.close()});
+  lb.addEventListener('click',function(e){if(e.target===lb)lb.close()});
+})();
+</script>
+</body>
+</html>
